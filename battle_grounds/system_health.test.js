@@ -54,16 +54,37 @@ function runTruthGate() {
 
   // Validate the Perimeter Guard
   const perimeterPath = path.join(coreDir, 'nexus-perimeter-guard.js');
+  let isPerimeterAuthorized = false;
   if (fs.existsSync(perimeterPath)) {
       const perimeterGuard = require(perimeterPath);
-      if (perimeterGuard.checkHealth() && perimeterGuard.validateEnvironmentContext().authorized) {
+      const authCheck = perimeterGuard.validateEnvironmentContext();
+      if (perimeterGuard.checkHealth() && authCheck.authorized) {
           console.log("✅ Nexus Perimeter Guard is ONLINE and environment is authorized.");
+          isPerimeterAuthorized = true;
       } else {
           console.error("❌ Truth Gate Failed: Perimeter Guard unauthorized or unhealthy.");
           process.exit(1);
       }
   } else {
       console.error("❌ Truth Gate Failed: nexus-perimeter-guard.js is missing.");
+      process.exit(1);
+  }
+
+  // Validate the Cloud Deployer orchestration
+  const deployerPath = path.join(coreDir, 'nexus-cloud-deployer.js');
+  if (fs.existsSync(deployerPath)) {
+      const cloudDeployer = require(deployerPath);
+      const isFinanceHealthy = true; // Derived from earlier check
+      
+      const deploymentState = cloudDeployer.validateDeploymentState(isFinanceHealthy, isPerimeterAuthorized);
+      if (cloudDeployer.checkHealth() && deploymentState.ready) {
+          console.log(`✅ Nexus Cloud Deployer is ONLINE. Target [${deploymentState.target}] is ready for automated rollout.`);
+      } else {
+          console.error("❌ Truth Gate Failed: Cloud Deployer rejected rollout conditions.");
+          process.exit(1);
+      }
+  } else {
+      console.error("❌ Truth Gate Failed: nexus-cloud-deployer.js is missing.");
       process.exit(1);
   }
 
