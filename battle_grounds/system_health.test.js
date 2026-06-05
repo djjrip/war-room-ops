@@ -88,7 +88,7 @@ function runTruthGate() {
       process.exit(1);
   }
 
-  // Validate the Central Orchestrator, Human Override, Immutable Ledger, Risk Engine, State Revert Engine, Threat Mitigator, Ledger Indexer, & Capital Optimizer
+  // Validate the Central Orchestrator, Human Override, Immutable Ledger, Risk Engine, State Revert Engine, Threat Mitigator, Ledger Indexer, Capital Optimizer & Telemetry Pulse & Healing Engine
   const orchestratorPath = path.join(coreDir, 'nexus-orchestrator.js');
   const overridePath = path.join(coreDir, 'nexus-human-override.js');
   const ledgerPath = path.join(coreDir, 'nexus-immutable-ledger.js');
@@ -97,8 +97,10 @@ function runTruthGate() {
   const mitigatorPath = path.join(coreDir, 'nexus-threat-mitigator.js');
   const indexerPath = path.join(coreDir, 'nexus-ledger-indexer.js');
   const optimizerPath = path.join(coreDir, 'nexus-capital-optimizer.js');
+  const pulsePath = path.join(coreDir, 'nexus-telemetry-pulse.js');
+  const healingPath = path.join(coreDir, 'nexus-healing-engine.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -107,8 +109,10 @@ function runTruthGate() {
       const threatMitigator = require(mitigatorPath);
       const ledgerIndexer = require(indexerPath);
       const capitalOptimizer = require(optimizerPath);
+      const telemetryPulse = require(pulsePath);
+      const healingEngine = require(healingPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -144,8 +148,8 @@ function runTruthGate() {
                                             
                                             // Try again, but this time simulate a post-flight failure
                                             orchestrator.executeDeploymentCycle("TXN-999", 6000, { simulatePostFlightFailure: true }).then(success2 => {
-                                                if (success2 === false) {
-                                                    console.log("✅ Simulation 2 Passed: Deployment failed post-flight and State Revert Engine triggered rollback.");
+                                                if (success2 === true) {
+                                                    console.log("✅ Simulation 2 Passed: Deployment failed post-flight, rolled back, HEALED, and successfully re-deployed.");
                                                     
                                                     // Simulation 3: Historical Anomaly Evaluation
                                                     console.log("\n--- SIMULATION 3: HISTORICAL ANOMALY CHECK ---");
@@ -156,14 +160,14 @@ function runTruthGate() {
                                                             // Verify Ledger & Telemetry Pulse
                                                             console.log("\n--- AUDITING IMMUTABLE LEDGER ---");
                                                             const history = ledger.getHistory();
-                                                            if (history.length === 13) { // Breach + Abort + Unlock + Risk Block + Abort + Optimize + Halted + Override + Optimize + Success + Revert + Risk Block + Abort
+                                                            // History length: Breach(2) + Unlock(1) + RiskBlock(2) + Sim1[Opt(1) + Halt(1)] + Override(1) + Sim2[Opt(1) + Success(1) + Revert(1) + Heal(1) + OptHealed(1) + SuccessHealed(1)] + Sim3[RiskBlock(2)] = 16 operations
+                                                            if (history.length === 16) { 
                                                                 console.log(`✅ Ledger verification passed. Trapped ${history.length} operations cryptographically.`);
                                                                 
                                                                 console.log("\n--- GENERATING TELEMETRY PULSE ---");
-                                                                const pulse = require(path.join(coreDir, 'nexus-telemetry-pulse.js'));
-                                                                const payload = pulse.broadcastPulse();
+                                                                const payload = telemetryPulse.broadcastPulse();
                                                                 
-                                                                if (payload.metrics.capitalSaved === "$2400" && payload.metrics.totalLedgerEvents === 13) {
+                                                                if (payload.metrics.capitalSaved === "$3600" && payload.metrics.totalLedgerEvents === 16) {
                                                                     console.log("✅ Simulation 4 Passed: Telemetry Pulse successfully aggregated agency metrics.");
                                                                     console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
                                                                     console.log("The autonomous engine is authorized to push the diary entry.");
@@ -173,7 +177,7 @@ function runTruthGate() {
                                                                     process.exit(1);
                                                                 }
                                                             } else {
-                                                                console.error(`❌ Truth Gate Failed: Ledger failed to accurately record the execution state. Expected 13, got ${history.length}`);
+                                                                console.error(`❌ Truth Gate Failed: Ledger failed to accurately record the execution state. Expected 16, got ${history.length}`);
                                                                 process.exit(1);
                                                             }
                                                         } else {
@@ -182,7 +186,7 @@ function runTruthGate() {
                                                         }
                                                     });
                                                 } else {
-                                                    console.error("❌ Truth Gate Failed: Orchestrator failed to trigger State Revert Engine after post-flight failure.");
+                                                    console.error("❌ Truth Gate Failed: Orchestrator failed to auto-remediate and re-deploy after post-flight failure.");
                                                     process.exit(1);
                                                 }
                                             });

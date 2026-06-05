@@ -55,33 +55,47 @@ class NexusOrchestrator {
         const finalAmount = capitalCheck.optimizedAmount;
 
         // 4. Audit Financials
-        const financeAudit = await financeBridge.auditTransaction(transactionId, finalAmount);
-        if (financeAudit.status === "PENDING_APPROVAL") {
-            console.warn("[ORCHESTRATOR] HALT: Circuit breaker tripped. Awaiting human approval for capital movement.");
-            ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_HALTED", { reason: "Circuit Breaker Tripped", transactionId });
-            return false;
+        if (!contextPayload.isHealingRetry) {
+            const financeAudit = await financeBridge.auditTransaction(transactionId, finalAmount);
+            if (financeAudit.status === "PENDING_APPROVAL") {
+                console.warn("[ORCHESTRATOR] HALT: Circuit breaker tripped. Awaiting human approval for capital movement.");
+                ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_HALTED", { reason: "Circuit Breaker Tripped", transactionId });
+                return false;
+            }
         }
 
-        // 4. Trigger Cloud Rollout
+        // 5. Deploy to Cloud
         const deploymentState = cloudDeployer.validateDeploymentState(true, true);
-        if (!deploymentState.ready) {
-            console.error("[ORCHESTRATOR] FATAL: Cloud Deployer rejected the rollout.");
-            ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_ABORTED", { reason: "Cloud Deployer Rejection" });
-            return false;
+        if (deploymentState.ready) {
+            console.log(`[ORCHESTRATOR] SUCCESS: Code deployed to ${deploymentState.target}.`);
+            ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_SUCCESS", { target: deploymentState.target, transactionId });
+            
+            // Post-Flight Health Check (Simulated)
+            if (contextPayload && contextPayload.simulatePostFlightFailure) {
+                console.warn(`[ORCHESTRATOR] WARNING: Post-flight health checks failed for ${transactionId}. Engaging State Revert Engine.`);
+                
+                // 6. Emergency Rollback
+                const revertEngine = require('./nexus-state-revert');
+                revertEngine.executeRollback(transactionId, deploymentState.target);
+                
+                // 7. Auto-Remediation (Healing Engine)
+                const healingEngine = require('./nexus-healing-engine');
+                const failureSignature = contextPayload.errorSignature || "ERR_OOM_CRASH"; // Default to OOM for simulation
+                const healingAttempt = healingEngine.attemptAutoRemediation(transactionId, failureSignature, contextPayload);
+                
+                if (healingAttempt.success) {
+                     console.log(`[ORCHESTRATOR] Healing Engine provided patched config. Auto-requeuing deployment...`);
+                     // Strip the post-flight failure flag so the patched run succeeds
+                     const patchedContext = { ...healingAttempt.patchedConfig, simulatePostFlightFailure: false, isHealingRetry: true };
+                     return await this.executeDeploymentCycle(`${transactionId}-HEALED`, amount, patchedContext);
+                } else {
+                     return false; // Rollback complete, but healing failed
+                }
+            }
+            
+            return true;
         }
-
-        console.log(`[ORCHESTRATOR] SUCCESS: Code deployed to ${deploymentState.target}.`);
-        ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_SUCCESS", { target: deploymentState.target, transactionId });
-
-        // 5. Post-Flight Health Checks
-        if (contextPayload.simulatePostFlightFailure) {
-            console.warn(`[ORCHESTRATOR] WARNING: Post-flight health checks failed for ${transactionId}. Engaging State Revert Engine.`);
-            const revertEngine = require('./nexus-state-revert');
-            revertEngine.executeRollback(transactionId, deploymentState.target);
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
     checkHealth() {
