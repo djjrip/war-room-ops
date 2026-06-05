@@ -88,9 +88,33 @@ function runTruthGate() {
       process.exit(1);
   }
 
-  console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-  console.log("The autonomous engine is authorized to push the diary entry.");
-  process.exit(0);
+  // Validate the Central Orchestrator
+  const orchestratorPath = path.join(coreDir, 'nexus-orchestrator.js');
+  if (fs.existsSync(orchestratorPath)) {
+      const orchestrator = require(orchestratorPath);
+      if (orchestrator.checkHealth()) {
+          console.log("✅ Nexus Orchestrator is ONLINE and monitoring all sub-systems.");
+          
+          // Run an end-to-end dry run (circuit breaker should halt deployment)
+          orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success => {
+              if (success === false) {
+                  console.log("✅ End-to-End simulation passed (Circuit breaker correctly halted execution).");
+                  console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                  console.log("The autonomous engine is authorized to push the diary entry.");
+                  process.exit(0);
+              } else {
+                  console.error("❌ Truth Gate Failed: Orchestrator deployed code without human financial approval!");
+                  process.exit(1);
+              }
+          });
+      } else {
+          console.error("❌ Truth Gate Failed: Orchestrator health check failed.");
+          process.exit(1);
+      }
+  } else {
+      console.error("❌ Truth Gate Failed: nexus-orchestrator.js is missing.");
+      process.exit(1);
+  }
 }
 
 runTruthGate();
