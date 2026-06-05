@@ -1,0 +1,3 @@
+[submodule "core/nexus-agent-framework"]
+	path = core/nexus-agent-framework
+	url = https://github.com/djjrip/nexus-agent-framework.git
