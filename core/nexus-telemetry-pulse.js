@@ -34,7 +34,7 @@ class NexusTelemetryPulse {
             if (record.actionType === "EMERGENCY_ROLLBACK") {
                 totalRollbacks++;
             }
-            if (record.actionType === "HIGH_RISK_BLOCK" || record.actionType === "SYSTEM_LOCKDOWN") {
+            if (record.actionType === "HIGH_RISK_BLOCK" || record.actionType === "SYSTEM_LOCKDOWN" || record.actionType === "COMPLIANCE_VIOLATION_FLAGGED") {
                 totalSecurityBlocks++;
             }
         });

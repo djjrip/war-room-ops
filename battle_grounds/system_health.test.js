@@ -100,8 +100,9 @@ function runTruthGate() {
   const pulsePath = path.join(coreDir, 'nexus-telemetry-pulse.js');
   const healingPath = path.join(coreDir, 'nexus-healing-engine.js');
   const compliancePath = path.join(coreDir, 'nexus-compliance-auditor.js');
+  const escalationPath = path.join(coreDir, 'nexus-escalation-matrix.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -113,8 +114,9 @@ function runTruthGate() {
       const telemetryPulse = require(pulsePath);
       const healingEngine = require(healingPath);
       const complianceAuditor = require(compliancePath);
+      const escalationMatrix = require(escalationPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -178,9 +180,27 @@ function runTruthGate() {
                                                                         
                                                                         if (payload.metrics.capitalSaved === "$3600" && payload.metrics.totalLedgerEvents === 19) {
                                                                             console.log("✅ Simulation 5 Passed: Telemetry Pulse successfully aggregated agency metrics.");
-                                                                            console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                                                                            console.log("The autonomous engine is authorized to push the diary entry.");
-                                                                            process.exit(0);
+                                                                            
+                                                                            // Simulation 6: Escalation Matrix
+                                                                            console.log("\n--- SIMULATION 6: ESCALATION MATRIX ---");
+                                                                            const escalationResult = escalationMatrix.evaluateTelemetry(payload);
+                                                                            if (escalationResult.escalated === true) {
+                                                                                 console.log("✅ Simulation 6 Passed: Escalation Matrix properly identified critical anomalies and paged the Director.");
+                                                                                 
+                                                                                 const finalHistory = ledger.getHistory();
+                                                                                 if (finalHistory.length === 20) {
+                                                                                     console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                                                                     console.log("The autonomous engine is authorized to push the diary entry.");
+                                                                                     process.exit(0);
+                                                                                 } else {
+                                                                                     console.error(`❌ Truth Gate Failed: Escalation matrix failed to record page on ledger. Expected 20, got ${finalHistory.length}`);
+                                                                                     process.exit(1);
+                                                                                 }
+                                                                            } else {
+                                                                                 console.error(`❌ Truth Gate Failed: Escalation Matrix failed to page the Director despite threshold breach.`);
+                                                                                 process.exit(1);
+                                                                            }
+                                                                            
                                                                         } else {
                                                                             console.error(`❌ Truth Gate Failed: Telemetry Pulse returned incorrect aggregation. Got savings: ${payload.metrics.capitalSaved}`);
                                                                             process.exit(1);
