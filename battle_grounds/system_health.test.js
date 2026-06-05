@@ -88,63 +88,76 @@ function runTruthGate() {
       process.exit(1);
   }
 
-  // Validate the Central Orchestrator, Human Override, & Immutable Ledger
+  // Validate the Central Orchestrator, Human Override, Immutable Ledger, & Risk Engine
   const orchestratorPath = path.join(coreDir, 'nexus-orchestrator.js');
   const overridePath = path.join(coreDir, 'nexus-human-override.js');
   const ledgerPath = path.join(coreDir, 'nexus-immutable-ledger.js');
+  const riskEnginePath = path.join(coreDir, 'nexus-risk-engine.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
+      const riskEngine = require(riskEnginePath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth()) {
-          console.log("✅ Nexus Orchestrator, Human Override, & Immutable Ledger are ONLINE.");
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth()) {
+          console.log("✅ Nexus Orchestrator, Human Override, Immutable Ledger, & Risk Engine are ONLINE.");
           
-          // Run an end-to-end dry run (circuit breaker should halt deployment)
-          orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success => {
-              if (success === false) {
-                  console.log("✅ Simulation 1 Passed: Circuit breaker correctly halted execution.");
+          // Simulation 0: High Risk Transaction
+          console.log("\n--- SIMULATION 0: HIGH RISK TRANSACTION ---");
+          orchestrator.executeDeploymentCycle("TXN-ANOMALY", 15000, { timeOfDay: "NIGHT_SHIFT" }).then(success0 => {
+              if (success0 === false) {
+                  console.log("✅ Simulation 0 Passed: Risk Engine correctly trapped an anomalous transaction.");
                   
-                  // Now apply the manual override
-                  console.log("\n--- TRIGGERING HUMAN OVERRIDE ---");
-                  humanOverride.authorizeFinancialTransaction("TXN-999", "Jayson Quindao");
-                  
-                  // Try again
-                  orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success2 => {
-                      if (success2 === true) {
-                          console.log("✅ Simulation 2 Passed: Human Override successfully unlocked the deployment.");
+                  // Run an end-to-end dry run (circuit breaker should halt deployment)
+                  orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success => {
+                      if (success === false) {
+                          console.log("✅ Simulation 1 Passed: Circuit breaker correctly halted execution.");
                           
-                          // Verify Ledger
-                          console.log("\n--- AUDITING IMMUTABLE LEDGER ---");
-                          const history = ledger.getHistory();
-                          if (history.length === 3) {
-                              console.log(`✅ Ledger verification passed. Trapped ${history.length} operations cryptographically.`);
-                              console.log(JSON.stringify(history, null, 2));
-                              console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                              console.log("The autonomous engine is authorized to push the diary entry.");
-                              process.exit(0);
-                          } else {
-                              console.error("❌ Truth Gate Failed: Ledger failed to accurately record the execution state.");
-                              process.exit(1);
-                          }
+                          // Now apply the manual override
+                          console.log("\n--- TRIGGERING HUMAN OVERRIDE ---");
+                          humanOverride.authorizeFinancialTransaction("TXN-999", "Jayson Quindao");
+                          
+                          // Try again
+                          orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success2 => {
+                              if (success2 === true) {
+                                  console.log("✅ Simulation 2 Passed: Human Override successfully unlocked the deployment.");
+                                  
+                                  // Verify Ledger
+                                  console.log("\n--- AUDITING IMMUTABLE LEDGER ---");
+                                  const history = ledger.getHistory();
+                                  if (history.length === 5) { // Anomaly Risk Block + Orchestrator Abort + Halted + Override + Success
+                                      console.log(`✅ Ledger verification passed. Trapped ${history.length} operations cryptographically.`);
+                                      console.log(JSON.stringify(history, null, 2));
+                                      console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                      console.log("The autonomous engine is authorized to push the diary entry.");
+                                      process.exit(0);
+                                  } else {
+                                      console.error(`❌ Truth Gate Failed: Ledger failed to accurately record the execution state. Expected 5, got ${history.length}`);
+                                      process.exit(1);
+                                  }
+                              } else {
+                                  console.error("❌ Truth Gate Failed: Deployment still failed after valid human override.");
+                                  process.exit(1);
+                              }
+                          });
+
                       } else {
-                          console.error("❌ Truth Gate Failed: Deployment still failed after valid human override.");
+                          console.error("❌ Truth Gate Failed: Orchestrator deployed code without human financial approval!");
                           process.exit(1);
                       }
                   });
-
               } else {
-                  console.error("❌ Truth Gate Failed: Orchestrator deployed code without human financial approval!");
+                  console.error("❌ Truth Gate Failed: Risk Engine allowed a high-risk transaction to deploy!");
                   process.exit(1);
               }
           });
       } else {
-          console.error("❌ Truth Gate Failed: Orchestrator, Override, or Ledger health check failed.");
+          console.error("❌ Truth Gate Failed: Orchestrator, Override, Ledger, or Risk Engine health check failed.");
           process.exit(1);
       }
   } else {
-      console.error("❌ Truth Gate Failed: Orchestrator, Override, or Ledger modules are missing.");
+      console.error("❌ Truth Gate Failed: Orchestrator, Override, Ledger, or Risk Engine modules are missing.");
       process.exit(1);
   }
 }

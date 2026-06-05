@@ -11,6 +11,7 @@ const perimeterGuard = require('./nexus-perimeter-guard');
 const financeBridge = require('./nexus-finance-bridge');
 const cloudDeployer = require('./nexus-cloud-deployer');
 const ledger = require('./nexus-immutable-ledger');
+const riskEngine = require('./nexus-risk-engine');
 
 class NexusOrchestrator {
     constructor() {
@@ -18,7 +19,7 @@ class NexusOrchestrator {
         console.log("[ORCHESTRATOR] Booting central intelligence...");
     }
 
-    async executeDeploymentCycle(transactionId, amount) {
+    async executeDeploymentCycle(transactionId, amount, contextPayload = { timeOfDay: "DAY_SHIFT" }) {
         console.log("\n--- INITIATING DEPLOYMENT CYCLE ---");
         
         // 1. Check Security Perimeter
@@ -26,6 +27,14 @@ class NexusOrchestrator {
         if (!authCheck.authorized) {
             console.error("[ORCHESTRATOR] FATAL: Perimeter breach detected. Aborting.");
             ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_ABORTED", { reason: "Perimeter Breach" });
+            return false;
+        }
+
+        // 2. Evaluate Dynamic Risk
+        const riskAssessment = riskEngine.evaluateTransactionRisk(transactionId, amount, contextPayload);
+        if (!riskAssessment.safe) {
+            console.error("[ORCHESTRATOR] FATAL: Risk Engine blocked deployment. Circuit breaker preemptively tripped.");
+            ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_HALTED", { reason: "Risk Score Exceeded Threshold", transactionId, score: riskAssessment.score });
             return false;
         }
 
