@@ -52,6 +52,21 @@ function runTruthGate() {
       process.exit(1);
   }
 
+  // Validate the Perimeter Guard
+  const perimeterPath = path.join(coreDir, 'nexus-perimeter-guard.js');
+  if (fs.existsSync(perimeterPath)) {
+      const perimeterGuard = require(perimeterPath);
+      if (perimeterGuard.checkHealth() && perimeterGuard.validateEnvironmentContext().authorized) {
+          console.log("✅ Nexus Perimeter Guard is ONLINE and environment is authorized.");
+      } else {
+          console.error("❌ Truth Gate Failed: Perimeter Guard unauthorized or unhealthy.");
+          process.exit(1);
+      }
+  } else {
+      console.error("❌ Truth Gate Failed: nexus-perimeter-guard.js is missing.");
+      process.exit(1);
+  }
+
   console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
   console.log("The autonomous engine is authorized to push the diary entry.");
   process.exit(0);
