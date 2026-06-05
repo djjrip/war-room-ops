@@ -102,8 +102,9 @@ function runTruthGate() {
   const compliancePath = path.join(coreDir, 'nexus-compliance-auditor.js');
   const escalationPath = path.join(coreDir, 'nexus-escalation-matrix.js');
   const liquidityPath = path.join(coreDir, 'nexus-liquidity-manager.js');
+  const revenuePath = path.join(coreDir, 'nexus-revenue-engine.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -117,8 +118,9 @@ function runTruthGate() {
       const complianceAuditor = require(compliancePath);
       const escalationMatrix = require(escalationPath);
       const liquidityManager = require(liquidityPath);
+      const revenueEngine = require(revenuePath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -173,14 +175,14 @@ function runTruthGate() {
                                                                     // Verify Ledger & Telemetry Pulse
                                                                     console.log("\n--- AUDITING IMMUTABLE LEDGER ---");
                                                                     const history = ledger.getHistory();
-                                                                    // Expected operations = 21
-                                                                    if (history.length === 21) { 
+                                                                    // Expected operations = 22
+                                                                    if (history.length === 22) { 
                                                                         console.log(`✅ Ledger verification passed. Trapped ${history.length} operations cryptographically.`);
                                                                         
                                                                         console.log("\n--- GENERATING TELEMETRY PULSE ---");
                                                                         const payload = telemetryPulse.broadcastPulse();
                                                                         
-                                                                        if (payload.metrics.capitalSaved === "$3600" && payload.metrics.totalLedgerEvents === 21) {
+                                                                        if (payload.metrics.capitalSaved === "$3600" && payload.metrics.revenueBilled === "$720" && payload.metrics.totalLedgerEvents === 22) {
                                                                             console.log("✅ Simulation 5 Passed: Telemetry Pulse successfully aggregated agency metrics.");
                                                                             
                                                                             // Simulation 6: Escalation Matrix
@@ -190,7 +192,7 @@ function runTruthGate() {
                                                                                  console.log("✅ Simulation 6 Passed: Escalation Matrix properly identified critical anomalies and paged the Director.");
                                                                                  
                                                                                  const finalHistory = ledger.getHistory();
-                                                                                 if (finalHistory.length === 22) {
+                                                                                 if (finalHistory.length === 23) {
                                                                                      console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
                                                                                      console.log("The autonomous engine is authorized to push the diary entry.");
                                                                                      process.exit(0);

@@ -112,6 +112,12 @@ class NexusOrchestrator {
                 return false;
             }
             
+            // 9. Revenue Engine (Billing)
+            const revenueEngine = require('./nexus-revenue-engine');
+            // Estimate compute units based on final optimized amount (proxy logic)
+            const computeUnits = Math.floor(finalAmount / 10);
+            revenueEngine.generateRevenue(transactionId, computeUnits);
+            
             return true;
         }
         return false;

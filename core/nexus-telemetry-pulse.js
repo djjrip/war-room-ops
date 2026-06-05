@@ -23,6 +23,7 @@ class NexusTelemetryPulse {
         let totalDeployments = 0;
         let totalRollbacks = 0;
         let totalSecurityBlocks = 0;
+        let totalRevenueBilled = 0;
 
         history.forEach(record => {
             if (record.actionType === "RIGHTSIZED_RESOURCES") {
@@ -37,6 +38,9 @@ class NexusTelemetryPulse {
             if (record.actionType === "HIGH_RISK_BLOCK" || record.actionType === "SYSTEM_LOCKDOWN" || record.actionType === "COMPLIANCE_VIOLATION_FLAGGED") {
                 totalSecurityBlocks++;
             }
+            if (record.actionType === "REVENUE_GENERATED") {
+                totalRevenueBilled += record.details.billedAmount;
+            }
         });
 
         const pulsePayload = {
@@ -44,6 +48,7 @@ class NexusTelemetryPulse {
             systemState: threatMitigator.isSystemLocked() ? "DEFCON 1 (LOCKED)" : "OPERATIONAL",
             metrics: {
                 capitalSaved: `$${totalCapitalSaved}`,
+                revenueBilled: `$${totalRevenueBilled}`,
                 successfulDeployments: totalDeployments,
                 emergencyRollbacks: totalRollbacks,
                 securityInterventions: totalSecurityBlocks,
