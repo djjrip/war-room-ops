@@ -55,3 +55,21 @@ jobs:
           base: ${{ github.event.repository.default_branch }}
           head: HEAD
           extra_args: --debug --only-verified
+
+  battle-grounds-truth-gate:
+    name: Nexus CTO Truth Gate Execution
+    runs-on: ubuntu-latest
+    needs: [lint-and-validate, security-scan]
+    steps:
+      - name: Checkout Code with Submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Battle Grounds Validation
+        run: node battle_grounds/system_health.test.js
