@@ -153,14 +153,25 @@ function runTruthGate() {
                                                         if (success3 === false) {
                                                             console.log("✅ Simulation 3 Passed: Ledger Indexer recognized historical failure and Risk Engine blocked TXN-999.");
                                                             
-                                                            // Verify Ledger
+                                                            // Verify Ledger & Telemetry Pulse
                                                             console.log("\n--- AUDITING IMMUTABLE LEDGER ---");
                                                             const history = ledger.getHistory();
                                                             if (history.length === 13) { // Breach + Abort + Unlock + Risk Block + Abort + Optimize + Halted + Override + Optimize + Success + Revert + Risk Block + Abort
                                                                 console.log(`✅ Ledger verification passed. Trapped ${history.length} operations cryptographically.`);
-                                                                console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                                                                console.log("The autonomous engine is authorized to push the diary entry.");
-                                                                process.exit(0);
+                                                                
+                                                                console.log("\n--- GENERATING TELEMETRY PULSE ---");
+                                                                const pulse = require(path.join(coreDir, 'nexus-telemetry-pulse.js'));
+                                                                const payload = pulse.broadcastPulse();
+                                                                
+                                                                if (payload.metrics.capitalSaved === "$2400" && payload.metrics.totalLedgerEvents === 13) {
+                                                                    console.log("✅ Simulation 4 Passed: Telemetry Pulse successfully aggregated agency metrics.");
+                                                                    console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                                                    console.log("The autonomous engine is authorized to push the diary entry.");
+                                                                    process.exit(0);
+                                                                } else {
+                                                                    console.error(`❌ Truth Gate Failed: Telemetry Pulse returned incorrect aggregation. Got savings: ${payload.metrics.capitalSaved}`);
+                                                                    process.exit(1);
+                                                                }
                                                             } else {
                                                                 console.error(`❌ Truth Gate Failed: Ledger failed to accurately record the execution state. Expected 13, got ${history.length}`);
                                                                 process.exit(1);
