@@ -88,16 +88,18 @@ function runTruthGate() {
       process.exit(1);
   }
 
-  // Validate the Central Orchestrator & Human Override
+  // Validate the Central Orchestrator, Human Override, & Immutable Ledger
   const orchestratorPath = path.join(coreDir, 'nexus-orchestrator.js');
   const overridePath = path.join(coreDir, 'nexus-human-override.js');
+  const ledgerPath = path.join(coreDir, 'nexus-immutable-ledger.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
+      const ledger = require(ledgerPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth()) {
-          console.log("✅ Nexus Orchestrator & Human Override are ONLINE.");
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth()) {
+          console.log("✅ Nexus Orchestrator, Human Override, & Immutable Ledger are ONLINE.");
           
           // Run an end-to-end dry run (circuit breaker should halt deployment)
           orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success => {
@@ -112,9 +114,20 @@ function runTruthGate() {
                   orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success2 => {
                       if (success2 === true) {
                           console.log("✅ Simulation 2 Passed: Human Override successfully unlocked the deployment.");
-                          console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                          console.log("The autonomous engine is authorized to push the diary entry.");
-                          process.exit(0);
+                          
+                          // Verify Ledger
+                          console.log("\n--- AUDITING IMMUTABLE LEDGER ---");
+                          const history = ledger.getHistory();
+                          if (history.length === 3) {
+                              console.log(`✅ Ledger verification passed. Trapped ${history.length} operations cryptographically.`);
+                              console.log(JSON.stringify(history, null, 2));
+                              console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                              console.log("The autonomous engine is authorized to push the diary entry.");
+                              process.exit(0);
+                          } else {
+                              console.error("❌ Truth Gate Failed: Ledger failed to accurately record the execution state.");
+                              process.exit(1);
+                          }
                       } else {
                           console.error("❌ Truth Gate Failed: Deployment still failed after valid human override.");
                           process.exit(1);
@@ -127,11 +140,11 @@ function runTruthGate() {
               }
           });
       } else {
-          console.error("❌ Truth Gate Failed: Orchestrator or Override health check failed.");
+          console.error("❌ Truth Gate Failed: Orchestrator, Override, or Ledger health check failed.");
           process.exit(1);
       }
   } else {
-      console.error("❌ Truth Gate Failed: Orchestrator or Override modules are missing.");
+      console.error("❌ Truth Gate Failed: Orchestrator, Override, or Ledger modules are missing.");
       process.exit(1);
   }
 }

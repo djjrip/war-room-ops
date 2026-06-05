@@ -10,6 +10,7 @@
 const perimeterGuard = require('./nexus-perimeter-guard');
 const financeBridge = require('./nexus-finance-bridge');
 const cloudDeployer = require('./nexus-cloud-deployer');
+const ledger = require('./nexus-immutable-ledger');
 
 class NexusOrchestrator {
     constructor() {
@@ -24,6 +25,7 @@ class NexusOrchestrator {
         const authCheck = perimeterGuard.validateEnvironmentContext();
         if (!authCheck.authorized) {
             console.error("[ORCHESTRATOR] FATAL: Perimeter breach detected. Aborting.");
+            ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_ABORTED", { reason: "Perimeter Breach" });
             return false;
         }
 
@@ -31,7 +33,7 @@ class NexusOrchestrator {
         const financeAudit = await financeBridge.auditTransaction(transactionId, amount);
         if (financeAudit.status === "PENDING_APPROVAL") {
             console.warn("[ORCHESTRATOR] HALT: Circuit breaker tripped. Awaiting human approval for capital movement.");
-            // We simulate that the human has not approved yet in this automated test
+            ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_HALTED", { reason: "Circuit Breaker Tripped", transactionId });
             return false;
         }
 
@@ -39,10 +41,12 @@ class NexusOrchestrator {
         const deploymentState = cloudDeployer.validateDeploymentState(true, true);
         if (!deploymentState.ready) {
             console.error("[ORCHESTRATOR] FATAL: Cloud Deployer rejected the rollout.");
+            ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_ABORTED", { reason: "Cloud Deployer Rejection" });
             return false;
         }
 
         console.log(`[ORCHESTRATOR] SUCCESS: Code deployed to ${deploymentState.target}.`);
+        ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_SUCCESS", { target: deploymentState.target, transactionId });
         return true;
     }
 

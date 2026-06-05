@@ -7,6 +7,7 @@
  */
 
 const financeBridge = require('./nexus-finance-bridge');
+const ledger = require('./nexus-immutable-ledger');
 
 class NexusHumanOverride {
     constructor() {
@@ -17,12 +18,13 @@ class NexusHumanOverride {
     authorizeFinancialTransaction(transactionId, directorSignature) {
         if (directorSignature !== this.authorizedDirector) {
             console.error(`[OVERRIDE] DENIED: Invalid Director Signature.`);
+            ledger.recordAction("UNAUTHORIZED_ACTOR", "OVERRIDE_DENIED", { transactionId, signature: directorSignature });
             return false;
         }
 
         console.log(`[OVERRIDE] SUCCESS: Director ${directorSignature} has manually approved transaction ${transactionId}. Clearing circuit breaker.`);
-        // In a real system, this would write to a secure ledger. Here we simulate clearing the bridge state.
         financeBridge.clearCircuitBreaker(transactionId);
+        ledger.recordAction("AGENCY_DIRECTOR", "OVERRIDE_APPROVED", { transactionId, action: "Cleared Financial Circuit Breaker" });
         return true;
     }
 
