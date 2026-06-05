@@ -1,0 +1,33 @@
+{
+    "ServiceArn": "arn:aws:apprunner:us-east-1:338078970810:service/ggloop-platform/b7331dbed2184d478e846819d5826c55",
+    "SourceConfiguration": {
+        "CodeRepository": {
+            "RepositoryUrl": "https://github.com/djjrip/gg-loop-platform",
+            "SourceCodeVersion": {
+                "Type": "BRANCH",
+                "Value": "main"
+            },
+            "CodeConfiguration": {
+                "ConfigurationSource": "API",
+                "CodeConfigurationValues": {
+                    "Runtime": "NODEJS_22",
+                    "BuildCommand": "cd apps/ggloop-web && npm install && npm run build",
+                    "StartCommand": "npm start",
+                    "Port": "8080",
+                    "RuntimeEnvironmentVariables": {
+                        "ENABLE_AUTO_TWEET": "true",
+                        "NODE_ENV": "production",
+                        "TWITTER_ACCESS_SECRET": "MqEwHwKJPbAGWU4uwAcn685niuZcTLeKwC1yXyuQ4Qvqj",
+                        "TWITTER_ACCESS_TOKEN": "1711907775159074816-A2sJomjkdyQIB9qMvfk7BBJHpZleJa",
+                        "TWITTER_CONSUMER_KEY": "xVwJHDk9zPfSXiwtUnPzoY6Fi",
+                        "TWITTER_CONSUMER_SECRET": "PzniVALPrDseUHBGB0MLS8IyG9vcQVuORh0YDxEKsZy1CwwM0y",
+                        "DISCORD_CLIENT_ID": "1437711568925098034",
+                        "DISCORD_CLIENT_SECRET": "r10g10CzTW4zCYKiguIvONDIGLGYSu7T",
+                        "SESSION_SECRET": "ggloop_super_secret_session_key_2026_prod",
+                        "BASE_URL": "https://ggloop.io"
+                    }
+                }
+            }
+        }
+    }
+}

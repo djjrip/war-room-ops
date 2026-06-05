@@ -1,0 +1,12 @@
+node_modules/
+.system_generated/
+logs.json
+app_logs.json
+aws_logs.json
+app_logs.txt
+service_logs.txt
+.env
+.tempmediaStorage/
+scratch/
+GGLOOP_MASTER_CONTEXT.md
+OPENCLAW_CEO_PROMPT_HEADER.md

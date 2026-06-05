@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apply Kit — Jayson Quindao</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050810;
+      --card: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --cyan: #00d4ff;
+      --gold: #ffd700;
+      --green: #00ff88;
+      --text: #e8eaf6;
+      --dim: rgba(232,234,246,0.55);
+      --muted: rgba(232,234,246,0.3);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; padding: 40px 24px 80px; }
+    .app { max-width: 960px; margin: 0 auto; }
+
+    h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; color: var(--cyan); letter-spacing: 1px; }
+    .sub { color: var(--dim); font-size: 0.88rem; margin-bottom: 32px; line-height: 1.6; }
+
+    .target-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .ttab {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--dim);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .ttab.active { background: rgba(0,212,255,0.12); border-color: var(--cyan); color: var(--cyan); }
+    .ttab:hover:not(.active) { color: var(--text); border-color: rgba(255,255,255,0.18); }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .job-header {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .job-emoji { font-size: 2.4rem; }
+    .job-info h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    .job-info p { font-size: 0.8rem; color: var(--dim); margin-bottom: 10px; }
+    .job-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag {
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.25);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.68rem;
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.5px;
+    }
+    .tag.gold { background: rgba(255,215,0,0.1); border-color: rgba(255,215,0,0.25); color: var(--gold); }
+    .tag.green { background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.25); color: var(--green); }
+
+    .section-label {
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 10px;
+    }
+
+    .cover-letter {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      font-size: 0.9rem;
+      line-height: 1.85;
+      color: var(--text);
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+      font-family: 'Inter', sans-serif;
+    }
+    .cover-letter strong { color: var(--cyan); }
+
+    .action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 18px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-cyan { background: linear-gradient(135deg, var(--cyan), #0099cc); color: #000; box-shadow: 0 4px 16px rgba(0,212,255,0.2); }
+    .btn-cyan:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,212,255,0.35); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--dim); }
+    .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+    .btn-gold { background: linear-gradient(135deg, var(--gold), #cc9900); color: #000; }
+    .btn-gold:hover { transform: translateY(-2px); }
+    .btn-green { background: linear-gradient(135deg, var(--green), #00cc66); color: #000; }
+    .btn-green:hover { transform: translateY(-2px); }
+
+    .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+    @media (max-width: 600px) { .tips-grid { grid-template-columns: 1fr; } }
+    .tip {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 0.8rem;
+    }
+    .tip strong { color: var(--gold); display: block; margin-bottom: 4px; font-size: 0.75rem; letter-spacing: 0.5px; }
+    .tip p { color: var(--dim); line-height: 1.5; }
+
+    .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+    .copy-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 14px;
+      color: var(--dim);
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { color: var(--cyan); border-color: var(--cyan); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+    .header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+
+    .followup-script {
+      background: rgba(255,215,0,0.04);
+      border: 1px solid rgba(255,215,0,0.15);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      margin-bottom: 16px;
+    }
+
+    .status-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(5,8,16,0.95);
+      border-top: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.78rem;
+      color: var(--dim);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+    .status-bar strong { color: var(--cyan); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>✦ APPLY KIT — Jayson Quindao</h1>
+  <p class="sub">Ready-to-send cover letters for your three highest-probability income targets. Copy → paste → send. Each one is tailored, ATS-safe, and based on your actual resume.</p>
+
+  <div class="target-tabs">
+    <button class="ttab active" onclick="showPanel('aa')">✈️ American Airlines</button>
+    <button class="ttab" onclick="showPanel('itfa')">💹 IT Financial Analyst</button>
+    <button class="ttab" onclick="showPanel('finops')">☁️ FinOps / Cloud Finance</button>
+    <button class="ttab" onclick="showPanel('followup')">📞 AA Follow-Up Script</button>
+    <button class="ttab" onclick="showPanel('freelance')">⚡ Upwork Pitch</button>
+  </div>
+
+  <!-- ─── AMERICAN AIRLINES ─── -->
+  <div class="panel active" id="panel-aa">
+    <div class="job-header">
+      <div class="job-emoji">✈️</div>
+      <div class="job-info">
+        <h2>American Airlines — Inflight Operations Coordinator</h2>
+        <p>Fort Worth, TX (DFW Hub) · Full-time · Non-Rev flight benefits from Day 1 · This is your highest-leverage application.</p>
+        <div class="job-tags">
+          <span class="tag green">ALREADY APPLIED — FOLLOW UP</span>
+          <span class="tag gold">Non-Rev Benefits</span>
+          <span class="tag">Finance + Ops overlap</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Cover Letter — Ready to Send</div>
+    <div class="header-row">
+      <span style="font-size:0.75rem;color:var(--muted)">Edit anything in [ brackets ] before sending</span>
+      <button class="copy-btn" onclick="copyText('cl-aa', this)">Copy Letter</button>
+    </div>
+    <div class="cover-letter" id="cl-aa">[TODAY'S DATE]
+
+Hiring Team
+American Airlines — Inflight Operations
+4333 Amon Carter Blvd
+Fort Worth, TX 76155
+
+Re: Inflight Operations Coordinator — [JOB REQUISITION #, if available]
+
+Dear Hiring Manager,
+
+I am writing to express my strong interest in the Inflight Operations Coordinator role at American Airlines. With over five years of high-volume operations experience — managing multi-million dollar financial workflows, coordinating cross-functional compliance, and building operational systems under zero error tolerance — I am confident I can contribute to American's operational excellence from day one.
+
+In my most recent role as a Finance Associate II, I processed and reconciled complex, time-sensitive payment records across national networks with 99.9%+ accuracy, while coordinating with cross-functional teams to resolve operational discrepancies through formal escalation workflows. These are precisely the skills required to support Inflight Operations: structured problem-solving, clear documentation, regulatory discipline, and composure under pressure.
+
+As the Founder of GG LOOP LLC, I have additionally built and operated a full-stack technology platform from the ground up — managing operational workflows, vendor integrations, and real-time system monitoring autonomously. This experience in owning an end-to-end operation, making judgment calls quickly, and maintaining accountability without a safety net directly maps to the demands of coordinating inflight operations at scale.
+
+What draws me specifically to American Airlines is the operational scale and culture of excellence. I am not looking for a desk job — I am looking for an environment where operational precision has real stakes, and where I can grow alongside one of the world's leading airlines.
+
+I am located in Grand Prairie, TX, just minutes from DFW International Airport, and available to start immediately. I would welcome the opportunity to discuss how my background in finance operations and systems architecture can support the Inflight Operations team.
+
+Thank you for your time and consideration.
+
+Sincerely,
+Jayson Quindao
+jquindao1@icloud.com
+linkedin.com/in/jaysonquindao</div>
+
+    <div class="action-row">
+      <a href="https://jobs.aa.com" target="_blank" class="btn btn-cyan">Apply / Check Status ↗</a>
+      <button class="btn btn-outline" onclick="showPanel('followup')">📞 Use Follow-Up Script Instead</button>
+    </div>
+
+    <div class="section-label">Why This Works</div>
+    <div class="tips-grid">
+      <div class="tip"><strong>✅ Finance → Ops Bridge</strong><p>The letter explicitly connects your payment reconciliation work to operational coordination — same skill set, different industry.</p></div>
+      <div class="tip"><strong>✅ Zero Error Tolerance</strong><p>Airlines care about precision. You used that exact phrase from your resume — it's the language they want to see.</p></div>
+      <div class="tip"><strong>✅ Local = Fast Start</strong><p>Grand Prairie → DFW is 10 minutes. Mentioning proximity signals no relocation friction and immediate availability.</p></div>
+      <div class="tip"><strong>✅ GG LOOP = Founder Credibility</strong><p>Running a platform solo shows judgment, ownership, and systems thinking — traits AA values in operations roles.</p></div>
+    </div>
+  </div>
+
+  <!-- ─── IT FINANCIAL ANALYST ─── -->
+  <div class="panel" id="panel-itfa">
+    <div class="job-header">
+      <div class="job-emoji">💹</div>
+      <div class="job-info">
+        <h2>IT Financial Analyst — DFW Area (Any Company)</h2>
+        <p>Dallas-Fort Worth Metroplex · $60K–$90K range · This is your direct resume match — highest interview conversion rate.</p>
+        <div class="job-tags">
+          <span class="tag green">DIRECT RESUME MATCH</span>
+          <span class="tag">SQL + Finance + Systems</span>
+          <span class="tag gold">Hybrid / Onsite</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Cover Letter — Ready to Send</div>
+    <div class="header-row">
+      <span style="font-size:0.75rem;color:var(--muted)">Replace [COMPANY NAME] before sending</span>
+      <button class="copy-btn" onclick="copyText('cl-itfa', this)">Copy Letter</button>
+    </div>
+    <div class="cover-letter" id="cl-itfa">[TODAY'S DATE]
+
+Hiring Manager
+[COMPANY NAME]
+[COMPANY ADDRESS or omit]
+
+Re: IT Financial Analyst — [JOB REQUISITION # if available]
+
+Dear Hiring Manager,
+
+I am applying for the IT Financial Analyst position at [COMPANY NAME]. I am a hybrid finance and technology professional with over five years of experience operating at the intersection of corporate financial modeling, data governance, and systems architecture — exactly the profile this role requires.
+
+In my role as Finance Associate II at a national financial services division, I owned multi-million dollar transaction reconciliation workflows end to end, achieving 99.9%+ accuracy across high-volume payment networks. I built structured exception-balancing processes, generated compliance documentation for regulatory audits, and reduced reconciliation cycle time by 40% through process architecture improvements — translating complex data into clean, executive-ready reporting.
+
+Concurrently, as Founder of GG LOOP LLC, I deliver the technical side of this skill set in practice: I architect and maintain a PostgreSQL database and data model tracking large-scale user engagement datasets, map Agile development spend to business ROI using Jira effort tracking, monitor cloud infrastructure costs (AWS, Vercel), and translate all of it into executive variance analysis. I am, in essence, already functioning as a FinOps and IT Financial Analyst — for my own company.
+
+My technical stack includes SQL (PostgreSQL), React, Node.js, Agile methodology, and proficiency with cloud provider cost analytics. I am comfortable building financial models, running ETL workflows, and presenting data-driven insights to non-technical stakeholders.
+
+I am based in Grand Prairie, TX, easily accessible to the Carrollton area and the broader DFW metro, and available for a hybrid or onsite schedule immediately.
+
+I would welcome the opportunity to discuss how I can bring both the financial rigor and systems fluency your team needs.
+
+Thank you for your consideration.
+
+Sincerely,
+Jayson Quindao
+jquindao1@icloud.com | github.com/djjrip | linkedin.com/in/jaysonquindao</div>
+
+    <div class="action-row">
+      <a href="https://www.linkedin.com/jobs/search/?keywords=IT+Financial+Analyst&location=Dallas%2C+TX&f_TPR=r604800" target="_blank" class="btn btn-cyan">Search LinkedIn Now ↗</a>
+      <a href="https://www.indeed.com/jobs?q=IT+Financial+Analyst&l=Dallas%2C+TX&sort=date" target="_blank" class="btn btn-outline">Search Indeed ↗</a>
+      <a href="https://www.usajobs.gov/Search/Results?k=IT+Financial+Analyst&l=Texas" target="_blank" class="btn btn-gold">Federal Roles ↗</a>
+    </div>
+
+    <div class="section-label">Top Companies Hiring This Role in DFW Right Now</div>
+    <div class="tips-grid">
+      <div class="tip"><strong>🏦 Bank of America / Citi / JPMorgan</strong><p>All have DFW ops centers. Tech + finance = exact hybrid they need. Search for "IT Financial Analyst" + company name on LinkedIn.</p></div>
+      <div class="tip"><strong>🏥 Baylor Scott & White / CHRISTUS</strong><p>Healthcare systems need FinOps analysts. Less competition than banking, often pay the same.</p></div>
+      <div class="tip"><strong>💻 AT&T / Nokia / Cisco (DFW offices)</strong><p>Telecom FinOps = cloud cost + Agile = your GG LOOP background fits perfectly.</p></div>
+      <div class="tip"><strong>✈️ Perot Systems / Sabre (Travel Tech DFW)</strong><p>Aviation-adjacent tech companies — keeps you in the industry orbit while earning.</p></div>
+    </div>
+  </div>
+
+  <!-- ─── FINOPS / CLOUD FINANCE ─── -->
+  <div class="panel" id="panel-finops">
+    <div class="job-header">
+      <div class="job-emoji">☁️</div>
+      <div class="job-info">
+        <h2>FinOps / Cloud Financial Analyst — Remote</h2>
+        <p>Remote · $70K–$100K range · Your GG LOOP AWS/Vercel work is DIRECT experience. Most candidates don't have hands-on cloud cost management at this level.</p>
+        <div class="job-tags">
+          <span class="tag green">REMOTE — NO RELOCATION</span>
+          <span class="tag gold">$70K–$100K Range</span>
+          <span class="tag">AWS + FinOps Framework</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Cover Letter — Ready to Send</div>
+    <div class="header-row">
+      <span style="font-size:0.75rem;color:var(--muted)">Replace [COMPANY NAME] before sending</span>
+      <button class="copy-btn" onclick="copyText('cl-finops', this)">Copy Letter</button>
+    </div>
+    <div class="cover-letter" id="cl-finops">[TODAY'S DATE]
+
+Hiring Manager
+[COMPANY NAME]
+
+Re: Cloud Financial Analyst / FinOps Analyst — [JOB REQUISITION # if available]
+
+Dear Hiring Manager,
+
+I am applying for the FinOps / Cloud Financial Analyst role at [COMPANY NAME]. I bring a rare combination of enterprise financial operations experience and hands-on cloud infrastructure management — the exact dual fluency that makes a FinOps practitioner effective.
+
+From the finance side: I spent over two years as a Finance Associate II managing multi-million dollar transaction flows, building compliance-grade reconciliation workflows, and producing variance analyses and regulatory reporting under strict accounting standards. I understand how financial data flows through an organization, how it gets categorized and allocated, and what executives need to make decisions.
+
+From the technology side: as Founder of GG LOOP LLC, I independently manage cloud infrastructure spend across Vercel and AWS-equivalent providers, forecast compute costs against development budgets, and map engineering effort (tracked in Agile sprints) to business ROI. I have built and maintain a PostgreSQL data model tracking large-scale user engagement and financial reward distributions — data governance at real scale.
+
+This is FinOps in practice. I am not a finance analyst who learned some cloud terms, nor a developer who added a spreadsheet — I operate daily at the intersection of both.
+
+My familiarity with the FinOps Foundation framework and cloud cost optimization principles, combined with my ability to translate technical infrastructure metrics into executive-facing financial reporting, makes me a strong fit for this role.
+
+I am available immediately for a fully remote engagement and can provide detailed examples of cloud cost allocation models and financial reporting artifacts from my current operations.
+
+Thank you for your time.
+
+Sincerely,
+Jayson Quindao
+jquindao1@icloud.com | github.com/djjrip | linkedin.com/in/jaysonquindao</div>
+
+    <div class="action-row">
+      <a href="https://www.linkedin.com/jobs/search/?keywords=FinOps+Cloud+Financial+Analyst&location=Remote&f_TPR=r604800&f_WT=2" target="_blank" class="btn btn-cyan">Search Remote FinOps Jobs ↗</a>
+      <a href="https://www.finops.org/community/jobs/" target="_blank" class="btn btn-outline">FinOps Foundation Job Board ↗</a>
+    </div>
+
+    <div class="tips-grid">
+      <div class="tip"><strong>🎯 Get the FinOps Practitioner Cert</strong><p>Free to register via finops.org — takes 1 week to study. Instantly differentiates you from other applicants and bumps salary by $10K–$15K.</p></div>
+      <div class="tip"><strong>☁️ Mention the AWS Free Tier</strong><p>If you've used even the AWS Free Tier for GG LOOP, that's real AWS experience. Say "AWS infrastructure cost management" — it's accurate.</p></div>
+    </div>
+  </div>
+
+  <!-- ─── FOLLOW-UP SCRIPT ─── -->
+  <div class="panel" id="panel-followup">
+    <div class="job-header">
+      <div class="job-emoji">📞</div>
+      <div class="job-info">
+        <h2>American Airlines — Follow-Up Email (Send TODAY)</h2>
+        <p>You already applied. This is the follow-up that actually gets responses. Send it to AA HR directly. Most applicants never follow up — this puts you in the top 5%.</p>
+        <div class="job-tags">
+          <span class="tag green">DO THIS TODAY</span>
+          <span class="tag gold">5 minutes of effort</span>
+          <span class="tag">Highest ROI action right now</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Follow-Up Email — Copy and Send</div>
+    <div class="header-row">
+      <span style="font-size:0.75rem;color:var(--muted)">Send to: jobs@aa.com or find the direct HR contact on LinkedIn</span>
+      <button class="copy-btn" onclick="copyText('cl-followup', this)">Copy Email</button>
+    </div>
+    <div class="followup-script" id="cl-followup">Subject: Following Up — Inflight Operations Coordinator Application | Jayson Quindao
+
+Hello,
+
+I wanted to follow up on my application for the Inflight Operations Coordinator position, which I submitted on [DATE YOU APPLIED].
+
+I remain very interested in this role and in contributing to American Airlines' operations team. My background in high-volume financial operations — where I managed multi-million dollar transaction workflows with 99.9%+ accuracy and coordinated cross-functional compliance — translates directly to the precision and operational discipline the Inflight Ops role demands.
+
+I am based in Grand Prairie, TX (10 minutes from DFW) and available to start immediately or interview at your convenience.
+
+If there is any additional information I can provide, or if the position is still active, I would welcome the opportunity to speak with the team.
+
+Thank you for your time.
+
+Jayson Quindao
+jquindao1@icloud.com
+linkedin.com/in/jaysonquindao</div>
+
+    <div class="action-row">
+      <a href="https://www.linkedin.com/company/american-airlines/people/?keywords=recruiter+inflight+operations" target="_blank" class="btn btn-cyan">Find AA Recruiter on LinkedIn ↗</a>
+      <a href="mailto:jobs@aa.com?subject=Following%20Up%20%E2%80%94%20Inflight%20Operations%20Coordinator%20Application%20%7C%20Jayson%20Quindao" class="btn btn-gold">Open in Email App</a>
+    </div>
+
+    <div class="section-label">Phone Script (If You Call HR)</div>
+    <div class="followup-script">"Hi, my name is Jayson Quindao and I'm calling to follow up on an application I submitted for the Inflight Operations Coordinator position. I applied on [DATE] and wanted to confirm it was received and check on next steps. I'm very interested in the role and I'm based right here in Grand Prairie, just minutes from DFW."
+
+→ If they say it's under review: "Great — is there anything I can provide to strengthen my application while it's being reviewed?"
+→ If they say to check online: "I will, thank you. And is there a name or contact I can reference for future follow-ups?"</div>
+  </div>
+
+  <!-- ─── UPWORK PITCH ─── -->
+  <div class="panel" id="panel-freelance">
+    <div class="job-header">
+      <div class="job-emoji">⚡</div>
+      <div class="job-info">
+        <h2>Upwork — Freelance Profile Pitch (Fast Cash)</h2>
+        <p>Set up or update your Upwork profile today. $50–$150/hr for financial modeling, SQL, or Node.js gigs. First 2 hours = more than a day's minimum wage.</p>
+        <div class="job-tags">
+          <span class="tag green">INCOME WITHIN 48HRS</span>
+          <span class="tag gold">$50–$150/hr</span>
+          <span class="tag">No interview required</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Upwork Profile Headline + Bio — Copy and Paste</div>
+    <div class="header-row">
+      <span style="font-size:0.75rem;color:var(--muted)">Use this exactly in your Upwork profile</span>
+      <button class="copy-btn" onclick="copyText('cl-upwork', this)">Copy Bio</button>
+    </div>
+    <div class="cover-letter" id="cl-upwork">HEADLINE:
+IT Financial Analyst & Full-Stack Engineer | SQL · FinOps · React/Node.js | 5+ Years Operations
+
+BIO:
+I'm a hybrid finance and technology professional with 5+ years of experience at the intersection of corporate financial operations and full-stack software engineering.
+
+On the finance side: I've managed multi-million dollar transaction reconciliation workflows with 99.9%+ accuracy, built regulatory compliance documentation, led variance analysis, and produced executive-grade financial reporting. I know how money flows through an organization and how to model, track, and report on it clearly.
+
+On the tech side: I build and maintain full-stack applications (React, Node.js, PostgreSQL), manage cloud infrastructure costs (AWS/Vercel FinOps), and architect data models at scale. I'm currently running a live SaaS platform (ggloop.io) independently.
+
+What I can do for you:
+• Financial modeling, forecasting, and variance analysis
+• SQL queries, data cleanup, and database architecture (PostgreSQL)
+• Cloud cost analysis and FinOps reporting
+• Full-stack web development (React, Node.js, REST APIs)
+• Business intelligence reporting and executive dashboards
+
+I work with precision, communicate clearly, and deliver on time. If you need someone who can bridge the gap between your finance team and your tech team — that's exactly what I do.
+
+HOURLY RATE: $65–$85/hr (negotiable for long-term contracts)</div>
+
+    <div class="action-row">
+      <a href="https://www.upwork.com/freelancers/settings/profile" target="_blank" class="btn btn-cyan">Update Upwork Profile ↗</a>
+      <a href="https://www.upwork.com/ab/proposals/job/~01" target="_blank" class="btn btn-outline">Browse Matching Jobs ↗</a>
+      <a href="https://www.toptal.com/finance/financial-analysts" target="_blank" class="btn btn-gold">Apply to Toptal (Premium) ↗</a>
+    </div>
+
+    <div class="tips-grid">
+      <div class="tip"><strong>🔥 Fastest Gigs to Land</strong><p>"Fix my SQL query" ($75), "Build me a Google Sheets budget model" ($150), "Clean up my database" ($200). Post in the finance + dev categories.</p></div>
+      <div class="tip"><strong>💡 First Job Strategy</strong><p>Take 1 small job at $40/hr just to get the first review. Then raise your rate. No reviews = hard to get hired. One 5-star review = everything changes.</p></div>
+      <div class="tip"><strong>⚡ Same-Day Option</strong><p>Post a "service" on Fiverr for "Financial Model in Google Sheets" at $75. People buy instantly with no back-and-forth.</p></div>
+      <div class="tip"><strong>📊 GG LOOP = Portfolio</strong><p>Your live platform IS your portfolio. Link to ggloop.io in your Upwork profile. A live SaaS is more impressive than any mock project.</p></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <p style="font-size:0.78rem;color:var(--muted);text-align:center">APEX Apply Kit · Built for Jayson Quindao · Grand Prairie, TX</p>
+</div>
+
+<div class="status-bar">
+  <span>📋 <strong>5 assets ready:</strong> AA Cover Letter · IT FA Cover Letter · FinOps Letter · Follow-Up Email · Upwork Pitch</span>
+  <span style="margin-left:auto;color:var(--muted)">Copy any letter → paste into email or application form → send</span>
+</div>
+
+<script>
+  function showPanel(id) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.ttab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function copyText(id, btn) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy Letter'; btn.classList.remove('copied'); }, 2500);
+    });
+  }
+</script>
+</body>
+</html>
