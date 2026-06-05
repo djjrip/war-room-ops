@@ -37,6 +37,21 @@ function runTruthGate() {
       }
   }
 
+  // Validate the integration bridge
+  const bridgePath = path.join(coreDir, 'nexus-finance-bridge.js');
+  if (fs.existsSync(bridgePath)) {
+      const financeBridge = require(bridgePath);
+      if (financeBridge.checkHealth()) {
+          console.log("✅ Nexus Finance Bridge is ONLINE and healthy.");
+      } else {
+          console.error("❌ Truth Gate Failed: Finance Bridge health check failed.");
+          process.exit(1);
+      }
+  } else {
+      console.error("❌ Truth Gate Failed: nexus-finance-bridge.js is missing.");
+      process.exit(1);
+  }
+
   console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
   console.log("The autonomous engine is authorized to push the diary entry.");
   process.exit(0);
