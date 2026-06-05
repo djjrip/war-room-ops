@@ -93,6 +93,14 @@ class NexusOrchestrator {
                 }
             }
             
+            
+            // 8. Compliance Audit (SOC2 / PCI-DSS)
+            const complianceAuditor = require('./nexus-compliance-auditor');
+            const auditResult = complianceAuditor.auditDeploymentConfig(transactionId, contextPayload);
+            if (!auditResult.compliant) {
+                return false;
+            }
+            
             return true;
         }
         return false;
