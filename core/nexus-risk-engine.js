@@ -8,6 +8,7 @@
  */
 
 const ledger = require('./nexus-immutable-ledger');
+const ledgerIndexer = require('./nexus-ledger-indexer');
 
 class NexusRiskEngine {
     constructor() {
@@ -28,6 +29,12 @@ class NexusRiskEngine {
         // 2. Financial Velocity
         if (amount > 10000) {
             riskScore += 50; // Large capital movement flag
+        }
+
+        // 3. Historical Anomalies (Indexed Ledger Lookup)
+        if (ledgerIndexer.hasHistoricalAnomalies(transactionId)) {
+            console.log(`[RISK ENGINE] WARNING: Historical anomalies detected for ${transactionId}. Applying penalty.`);
+            riskScore += 80; // Massive historical failure flag
         }
 
         // 3. Ledger Velocity (Are we spamming deployments?)

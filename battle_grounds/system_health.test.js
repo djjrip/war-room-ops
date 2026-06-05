@@ -88,24 +88,26 @@ function runTruthGate() {
       process.exit(1);
   }
 
-  // Validate the Central Orchestrator, Human Override, Immutable Ledger, Risk Engine, State Revert Engine, & Threat Mitigator
+  // Validate the Central Orchestrator, Human Override, Immutable Ledger, Risk Engine, State Revert Engine, Threat Mitigator, & Ledger Indexer
   const orchestratorPath = path.join(coreDir, 'nexus-orchestrator.js');
   const overridePath = path.join(coreDir, 'nexus-human-override.js');
   const ledgerPath = path.join(coreDir, 'nexus-immutable-ledger.js');
   const riskEnginePath = path.join(coreDir, 'nexus-risk-engine.js');
   const revertEnginePath = path.join(coreDir, 'nexus-state-revert.js');
   const mitigatorPath = path.join(coreDir, 'nexus-threat-mitigator.js');
+  const indexerPath = path.join(coreDir, 'nexus-ledger-indexer.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
       const riskEngine = require(riskEnginePath);
       const revertEngine = require(revertEnginePath);
       const threatMitigator = require(mitigatorPath);
+      const ledgerIndexer = require(indexerPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth()) {
-          console.log("✅ Nexus Orchestrator, Human Override, Immutable Ledger, Risk Engine, State Revert Engine, & Threat Mitigator are ONLINE.");
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth()) {
+          console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
           console.log("\n--- SIMULATION -1: HOSTILE PERIMETER BREACH ---");
@@ -142,19 +144,29 @@ function runTruthGate() {
                                                 if (success2 === false) {
                                                     console.log("✅ Simulation 2 Passed: Deployment failed post-flight and State Revert Engine triggered rollback.");
                                                     
-                                                    // Verify Ledger
-                                                    console.log("\n--- AUDITING IMMUTABLE LEDGER ---");
-                                                    const history = ledger.getHistory();
-                                                    if (history.length === 9) { // Breach + Abort + Director Unlock + Risk Block + Abort + Halted + Override + Success + Revert
-                                                        console.log(`✅ Ledger verification passed. Trapped ${history.length} operations cryptographically.`);
-                                                        console.log(JSON.stringify(history, null, 2));
-                                                        console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                                                        console.log("The autonomous engine is authorized to push the diary entry.");
-                                                        process.exit(0);
-                                                    } else {
-                                                        console.error(`❌ Truth Gate Failed: Ledger failed to accurately record the execution state. Expected 9, got ${history.length}`);
-                                                        process.exit(1);
-                                                    }
+                                                    // Simulation 3: Historical Anomaly Evaluation
+                                                    console.log("\n--- SIMULATION 3: HISTORICAL ANOMALY CHECK ---");
+                                                    orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success3 => {
+                                                        if (success3 === false) {
+                                                            console.log("✅ Simulation 3 Passed: Ledger Indexer recognized historical failure and Risk Engine blocked TXN-999.");
+                                                            
+                                                            // Verify Ledger
+                                                            console.log("\n--- AUDITING IMMUTABLE LEDGER ---");
+                                                            const history = ledger.getHistory();
+                                                            if (history.length === 11) { // Breach + Abort + Unlock + Risk Block + Abort + Halted + Override + Success + Revert + Risk Block + Abort
+                                                                console.log(`✅ Ledger verification passed. Trapped ${history.length} operations cryptographically.`);
+                                                                console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                                                console.log("The autonomous engine is authorized to push the diary entry.");
+                                                                process.exit(0);
+                                                            } else {
+                                                                console.error(`❌ Truth Gate Failed: Ledger failed to accurately record the execution state. Expected 11, got ${history.length}`);
+                                                                process.exit(1);
+                                                            }
+                                                        } else {
+                                                            console.error("❌ Truth Gate Failed: Risk Engine failed to penalize a transaction with historical failures.");
+                                                            process.exit(1);
+                                                        }
+                                                    });
                                                 } else {
                                                     console.error("❌ Truth Gate Failed: Orchestrator failed to trigger State Revert Engine after post-flight failure.");
                                                     process.exit(1);
@@ -184,11 +196,11 @@ function runTruthGate() {
           });
 
       } else {
-          console.error("❌ Truth Gate Failed: Orchestrator, Override, Ledger, Risk Engine, Revert Engine, or Threat Mitigator health check failed.");
+          console.error("❌ Truth Gate Failed: One or more Nexus subsystems failed health checks.");
           process.exit(1);
       }
   } else {
-      console.error("❌ Truth Gate Failed: Orchestrator, Override, Ledger, Risk Engine, Revert Engine, or Threat Mitigator modules are missing.");
+      console.error("❌ Truth Gate Failed: One or more Nexus subsystem modules are missing.");
       process.exit(1);
   }
 }
