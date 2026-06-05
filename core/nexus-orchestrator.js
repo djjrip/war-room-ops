@@ -54,6 +54,17 @@ class NexusOrchestrator {
         const capitalCheck = optimizer.optimizeCapital(transactionId, amount, "AWS_EU_WEST_1");
         const finalAmount = capitalCheck.optimizedAmount;
 
+        // 3b. Ensure Liquidity
+        if (!contextPayload.isHealingRetry) {
+             const liquidityManager = require('./nexus-liquidity-manager');
+             const liquidityCheck = liquidityManager.ensureLiquidity(transactionId, finalAmount);
+             if (!liquidityCheck.funded) {
+                 console.error("[ORCHESTRATOR] FATAL: Insufficient liquidity to fund deployment. Aborting.");
+                 ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_HALTED", { reason: "Insolvency", transactionId });
+                 return false;
+             }
+        }
+
         // 4. Audit Financials
         if (!contextPayload.isHealingRetry) {
             const financeAudit = await financeBridge.auditTransaction(transactionId, finalAmount);
