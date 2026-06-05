@@ -1,3 +1,6 @@
 [submodule "core/nexus-agent-framework"]
 	path = core/nexus-agent-framework
 	url = https://github.com/djjrip/nexus-agent-framework.git
+[submodule "core/sql-reconciliation-engine"]
+	path = core/sql-reconciliation-engine
+	url = https://github.com/djjrip/sql-reconciliation-engine.git
