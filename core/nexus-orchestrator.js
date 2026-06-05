@@ -12,6 +12,7 @@ const financeBridge = require('./nexus-finance-bridge');
 const cloudDeployer = require('./nexus-cloud-deployer');
 const ledger = require('./nexus-immutable-ledger');
 const riskEngine = require('./nexus-risk-engine');
+const threatMitigator = require('./nexus-threat-mitigator');
 
 class NexusOrchestrator {
     constructor() {
@@ -22,11 +23,21 @@ class NexusOrchestrator {
     async executeDeploymentCycle(transactionId, amount, contextPayload = { timeOfDay: "DAY_SHIFT" }) {
         console.log("\n--- INITIATING DEPLOYMENT CYCLE ---");
         
+        if (threatMitigator.isSystemLocked()) {
+            console.error("[ORCHESTRATOR] FATAL: System is currently in DEFCON 1 Lockdown. Execution frozen.");
+            return false;
+        }
+
         // 1. Check Security Perimeter
-        const authCheck = perimeterGuard.validateEnvironmentContext();
+        let authCheck = perimeterGuard.validateEnvironmentContext();
+        if (contextPayload.simulatePerimeterBreach) {
+             authCheck = { authorized: false };
+        }
+        
         if (!authCheck.authorized) {
-            console.error("[ORCHESTRATOR] FATAL: Perimeter breach detected. Aborting.");
-            ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_ABORTED", { reason: "Perimeter Breach" });
+            console.error("[ORCHESTRATOR] FATAL: Perimeter breach detected.");
+            threatMitigator.initiateLockdown("Unauthorized Execution Context");
+            ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_ABORTED", { reason: "Perimeter Breach Lockdown" });
             return false;
         }
 
