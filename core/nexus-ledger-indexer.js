@@ -38,7 +38,9 @@ class NexusLedgerIndexer {
         
         const records = this.indexMap.get(transactionId) || [];
         for (const record of records) {
-            if (record.actionType === "DEPLOYMENT_HALTED" || record.actionType === "HIGH_RISK_BLOCK" || record.actionType === "EMERGENCY_ROLLBACK") {
+            // Only true failures or active blocks should penalize future runs.
+            // A circuit breaker 'DEPLOYMENT_HALTED' is just a pause for human review, not an anomaly.
+            if (record.actionType === "HIGH_RISK_BLOCK" || record.actionType === "EMERGENCY_ROLLBACK") {
                 return true;
             }
         }

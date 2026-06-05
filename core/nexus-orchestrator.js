@@ -49,8 +49,13 @@ class NexusOrchestrator {
             return false;
         }
 
-        // 2. Audit Financials
-        const financeAudit = await financeBridge.auditTransaction(transactionId, amount);
+        // 3. Optimize Capital
+        const optimizer = require('./nexus-capital-optimizer');
+        const capitalCheck = optimizer.optimizeCapital(transactionId, amount, "AWS_EU_WEST_1");
+        const finalAmount = capitalCheck.optimizedAmount;
+
+        // 4. Audit Financials
+        const financeAudit = await financeBridge.auditTransaction(transactionId, finalAmount);
         if (financeAudit.status === "PENDING_APPROVAL") {
             console.warn("[ORCHESTRATOR] HALT: Circuit breaker tripped. Awaiting human approval for capital movement.");
             ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_HALTED", { reason: "Circuit Breaker Tripped", transactionId });
