@@ -88,20 +88,22 @@ function runTruthGate() {
       process.exit(1);
   }
 
-  // Validate the Central Orchestrator, Human Override, Immutable Ledger, & Risk Engine
+  // Validate the Central Orchestrator, Human Override, Immutable Ledger, Risk Engine, & State Revert Engine
   const orchestratorPath = path.join(coreDir, 'nexus-orchestrator.js');
   const overridePath = path.join(coreDir, 'nexus-human-override.js');
   const ledgerPath = path.join(coreDir, 'nexus-immutable-ledger.js');
   const riskEnginePath = path.join(coreDir, 'nexus-risk-engine.js');
+  const revertEnginePath = path.join(coreDir, 'nexus-state-revert.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
       const riskEngine = require(riskEnginePath);
+      const revertEngine = require(revertEnginePath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth()) {
-          console.log("✅ Nexus Orchestrator, Human Override, Immutable Ledger, & Risk Engine are ONLINE.");
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth()) {
+          console.log("✅ Nexus Orchestrator, Human Override, Immutable Ledger, Risk Engine, & State Revert Engine are ONLINE.");
           
           // Simulation 0: High Risk Transaction
           console.log("\n--- SIMULATION 0: HIGH RISK TRANSACTION ---");
@@ -110,7 +112,7 @@ function runTruthGate() {
                   console.log("✅ Simulation 0 Passed: Risk Engine correctly trapped an anomalous transaction.");
                   
                   // Run an end-to-end dry run (circuit breaker should halt deployment)
-                  orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success => {
+                  orchestrator.executeDeploymentCycle("TXN-999", 5000, { simulatePostFlightFailure: true }).then(success => {
                       if (success === false) {
                           console.log("✅ Simulation 1 Passed: Circuit breaker correctly halted execution.");
                           
@@ -118,26 +120,26 @@ function runTruthGate() {
                           console.log("\n--- TRIGGERING HUMAN OVERRIDE ---");
                           humanOverride.authorizeFinancialTransaction("TXN-999", "Jayson Quindao");
                           
-                          // Try again
-                          orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success2 => {
-                              if (success2 === true) {
-                                  console.log("✅ Simulation 2 Passed: Human Override successfully unlocked the deployment.");
+                          // Try again, but this time simulate a post-flight failure
+                          orchestrator.executeDeploymentCycle("TXN-999", 5000, { simulatePostFlightFailure: true }).then(success2 => {
+                              if (success2 === false) {
+                                  console.log("✅ Simulation 2 Passed: Deployment failed post-flight and State Revert Engine triggered rollback.");
                                   
                                   // Verify Ledger
                                   console.log("\n--- AUDITING IMMUTABLE LEDGER ---");
                                   const history = ledger.getHistory();
-                                  if (history.length === 5) { // Anomaly Risk Block + Orchestrator Abort + Halted + Override + Success
+                                  if (history.length === 6) { // Risk Block + Abort + Halted + Override + Success + Revert
                                       console.log(`✅ Ledger verification passed. Trapped ${history.length} operations cryptographically.`);
                                       console.log(JSON.stringify(history, null, 2));
                                       console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
                                       console.log("The autonomous engine is authorized to push the diary entry.");
                                       process.exit(0);
                                   } else {
-                                      console.error(`❌ Truth Gate Failed: Ledger failed to accurately record the execution state. Expected 5, got ${history.length}`);
+                                      console.error(`❌ Truth Gate Failed: Ledger failed to accurately record the execution state. Expected 6, got ${history.length}`);
                                       process.exit(1);
                                   }
                               } else {
-                                  console.error("❌ Truth Gate Failed: Deployment still failed after valid human override.");
+                                  console.error("❌ Truth Gate Failed: Orchestrator failed to trigger State Revert Engine after post-flight failure.");
                                   process.exit(1);
                               }
                           });
@@ -153,11 +155,11 @@ function runTruthGate() {
               }
           });
       } else {
-          console.error("❌ Truth Gate Failed: Orchestrator, Override, Ledger, or Risk Engine health check failed.");
+          console.error("❌ Truth Gate Failed: Orchestrator, Override, Ledger, Risk Engine, or Revert Engine health check failed.");
           process.exit(1);
       }
   } else {
-      console.error("❌ Truth Gate Failed: Orchestrator, Override, Ledger, or Risk Engine modules are missing.");
+      console.error("❌ Truth Gate Failed: Orchestrator, Override, Ledger, Risk Engine, or Revert Engine modules are missing.");
       process.exit(1);
   }
 }

@@ -46,7 +46,7 @@ class NexusOrchestrator {
             return false;
         }
 
-        // 3. Trigger Cloud Rollout
+        // 4. Trigger Cloud Rollout
         const deploymentState = cloudDeployer.validateDeploymentState(true, true);
         if (!deploymentState.ready) {
             console.error("[ORCHESTRATOR] FATAL: Cloud Deployer rejected the rollout.");
@@ -56,6 +56,15 @@ class NexusOrchestrator {
 
         console.log(`[ORCHESTRATOR] SUCCESS: Code deployed to ${deploymentState.target}.`);
         ledger.recordAction("ORCHESTRATOR", "DEPLOYMENT_SUCCESS", { target: deploymentState.target, transactionId });
+
+        // 5. Post-Flight Health Checks
+        if (contextPayload.simulatePostFlightFailure) {
+            console.warn(`[ORCHESTRATOR] WARNING: Post-flight health checks failed for ${transactionId}. Engaging State Revert Engine.`);
+            const revertEngine = require('./nexus-state-revert');
+            revertEngine.executeRollback(transactionId, deploymentState.target);
+            return false;
+        }
+
         return true;
     }
 
