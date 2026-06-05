@@ -1,0 +1,57 @@
+name: War Room Ops CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+
+jobs:
+  lint-and-validate:
+    name: Lint & Validate Infrastructure Scripts
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell Module Path
+        run: |
+          mkdir -p "$env:USERPROFILE\Documents\PowerShell\Modules"
+          
+      - name: Syntax Check PowerShell Scripts
+        shell: pwsh
+        run: |
+          $scripts = Get-ChildItem -Path . -Filter *.ps1 -Recurse
+          $hasErrors = $false
+          foreach ($script in $scripts) {
+              try {
+                  $null = [System.Management.Automation.Language.Parser]::ParseFile($script.FullName, [ref]$null, [ref]$null)
+                  Write-Host "✅ Syntax OK: $($script.Name)" -ForegroundColor Green
+              } catch {
+                  Write-Host "❌ Syntax Error in $($script.Name)" -ForegroundColor Red
+                  $hasErrors = $true
+              }
+          }
+          if ($hasErrors) {
+              exit 1
+          }
+
+  security-scan:
+    name: Repository Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Run TruffleHog (Secret Scanner)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
