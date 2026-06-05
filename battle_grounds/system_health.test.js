@@ -88,31 +88,50 @@ function runTruthGate() {
       process.exit(1);
   }
 
-  // Validate the Central Orchestrator
+  // Validate the Central Orchestrator & Human Override
   const orchestratorPath = path.join(coreDir, 'nexus-orchestrator.js');
-  if (fs.existsSync(orchestratorPath)) {
+  const overridePath = path.join(coreDir, 'nexus-human-override.js');
+  
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath)) {
       const orchestrator = require(orchestratorPath);
-      if (orchestrator.checkHealth()) {
-          console.log("✅ Nexus Orchestrator is ONLINE and monitoring all sub-systems.");
+      const humanOverride = require(overridePath);
+      
+      if (orchestrator.checkHealth() && humanOverride.checkHealth()) {
+          console.log("✅ Nexus Orchestrator & Human Override are ONLINE.");
           
           // Run an end-to-end dry run (circuit breaker should halt deployment)
           orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success => {
               if (success === false) {
-                  console.log("✅ End-to-End simulation passed (Circuit breaker correctly halted execution).");
-                  console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                  console.log("The autonomous engine is authorized to push the diary entry.");
-                  process.exit(0);
+                  console.log("✅ Simulation 1 Passed: Circuit breaker correctly halted execution.");
+                  
+                  // Now apply the manual override
+                  console.log("\n--- TRIGGERING HUMAN OVERRIDE ---");
+                  humanOverride.authorizeFinancialTransaction("TXN-999", "Jayson Quindao");
+                  
+                  // Try again
+                  orchestrator.executeDeploymentCycle("TXN-999", 5000).then(success2 => {
+                      if (success2 === true) {
+                          console.log("✅ Simulation 2 Passed: Human Override successfully unlocked the deployment.");
+                          console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                          console.log("The autonomous engine is authorized to push the diary entry.");
+                          process.exit(0);
+                      } else {
+                          console.error("❌ Truth Gate Failed: Deployment still failed after valid human override.");
+                          process.exit(1);
+                      }
+                  });
+
               } else {
                   console.error("❌ Truth Gate Failed: Orchestrator deployed code without human financial approval!");
                   process.exit(1);
               }
           });
       } else {
-          console.error("❌ Truth Gate Failed: Orchestrator health check failed.");
+          console.error("❌ Truth Gate Failed: Orchestrator or Override health check failed.");
           process.exit(1);
       }
   } else {
-      console.error("❌ Truth Gate Failed: nexus-orchestrator.js is missing.");
+      console.error("❌ Truth Gate Failed: Orchestrator or Override modules are missing.");
       process.exit(1);
   }
 }

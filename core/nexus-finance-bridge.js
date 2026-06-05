@@ -13,13 +13,21 @@ class NexusFinanceBridge {
     }
 
     async auditTransaction(transactionId, amount) {
-        if (this.circuitBreakerActive) {
+        // In a real system, we would check a database of approved transaction IDs.
+        // For this orchestration, we check if the circuit breaker is globally active.
+        if (this.circuitBreakerActive && !this.approvedTransactions?.has(transactionId)) {
             console.log(`[CIRCUIT BREAKER] Human approval required for transaction ${transactionId}`);
             return { status: "PENDING_APPROVAL", amount };
         }
         
         console.log(`[AUDIT] Validating transaction ${transactionId}...`);
         return { status: "VALIDATED", amount };
+    }
+
+    clearCircuitBreaker(transactionId) {
+        if (!this.approvedTransactions) this.approvedTransactions = new Set();
+        this.approvedTransactions.add(transactionId);
+        console.log(`[FINANCE BRIDGE] Circuit Breaker cleared for ${transactionId}.`);
     }
 
     checkHealth() {
