@@ -109,8 +109,9 @@ function runTruthGate() {
   const boardPath = path.join(coreDir, 'nexus-board-of-directors.js');
   const dividendPath = path.join(coreDir, 'nexus-dividend-emitter.js');
   const exitPath = path.join(coreDir, 'nexus-exit-strategist.js');
+  const vaultPath = path.join(coreDir, 'nexus-ip-vault.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -131,8 +132,9 @@ function runTruthGate() {
       const boardOfDirectors = require(boardPath);
       const dividendEmitter = require(dividendPath);
       const exitStrategist = require(exitPath);
+      const ipVault = require(vaultPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -233,13 +235,22 @@ function runTruthGate() {
                                                                                                  const exitResult = exitStrategist.evaluateExitVelocity(payload);
                                                                                                  if (exitResult.status === "HOLDING_PATTERN" || exitResult.status === "M_AND_A_READINESS_UNLOCKED") {
                                                                                                      console.log(`✅ Simulation 11 Passed: Exit Strategist evaluated M&A velocity at ${exitResult.velocityPercentage}%.`);
-                                                                                                     const finalHistory = ledger.getHistory();
-                                                                                                     if (finalHistory.length === 29) {
-                                                                                                         console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                                                                                                         console.log("The autonomous engine is authorized to push the diary entry.");
-                                                                                                         process.exit(0);
+                                                                                                     // Simulation 12: IP Vault
+                                                                                                     console.log("\n--- SIMULATION 12: IP VAULT ---");
+                                                                                                     const vaultResult = ipVault.secureIntellectualProperty();
+                                                                                                     if (vaultResult.status === "SECURED") {
+                                                                                                         console.log(`✅ Simulation 12 Passed: IP Vault cryptographically anchored ${vaultResult.securedAssetsCount} algorithms. Manifest: ${vaultResult.vaultManifestHash.substring(0, 16)}...`);
+                                                                                                         const finalHistory = ledger.getHistory();
+                                                                                                         if (finalHistory.length === 30) {
+                                                                                                             console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                                                                                             console.log("The autonomous engine is authorized to push the diary entry.");
+                                                                                                             process.exit(0);
+                                                                                                         } else {
+                                                                                                             console.log(`❌ Truth Gate Failed: Expected 30 ledger events, got ${finalHistory.length}`);
+                                                                                                             process.exit(1);
+                                                                                                         }
                                                                                                      } else {
-                                                                                                         console.log(`❌ Truth Gate Failed: Expected 29 ledger events, got ${finalHistory.length}`);
+                                                                                                         console.log(`❌ Truth Gate Failed: IP Vault failed to secure intellectual property.`);
                                                                                                          process.exit(1);
                                                                                                      }
                                                                                                  } else {
