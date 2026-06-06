@@ -105,8 +105,9 @@ function runTruthGate() {
   const revenuePath = path.join(coreDir, 'nexus-revenue-engine.js');
   const valuationPath = path.join(coreDir, 'nexus-valuation-engine.js');
   const strategyPath = path.join(coreDir, 'nexus-strategy-director.js');
+  const forecastPath = path.join(coreDir, 'nexus-profitability-forecaster.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -123,8 +124,9 @@ function runTruthGate() {
       const revenueEngine = require(revenuePath);
       const valuationEngine = require(valuationPath);
       const strategyDirector = require(strategyPath);
+      const profitabilityForecaster = require(forecastPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -205,13 +207,22 @@ function runTruthGate() {
                                                                                  const strategyResult = strategyDirector.formulateStrategy(payload);
                                                                                  if (strategyResult.executedStrategy === "HARDENED_ZERO_TRUST") {
                                                                                      console.log("✅ Simulation 7 Passed: Strategy Director shifted architecture to Zero-Trust due to elevated threat levels.");
-                                                                                     const finalHistory = ledger.getHistory();
-                                                                                     if (finalHistory.length === 25) {
-                                                                                         console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                                                                                         console.log("The autonomous engine is authorized to push the diary entry.");
-                                                                                         process.exit(0);
+                                                                                     // Simulation 8: Profitability Forecaster
+                                                                                     console.log("\n--- SIMULATION 8: PROFITABILITY FORECASTER ---");
+                                                                                     const forecastResult = profitabilityForecaster.generateForecast(payload);
+                                                                                     if (forecastResult.forecastStatus === "TARGET_EXCEEDED") {
+                                                                                         console.log("✅ Simulation 8 Passed: Profitability Forecaster verified that the $1M valuation target has been exceeded.");
+                                                                                         const finalHistory = ledger.getHistory();
+                                                                                         if (finalHistory.length === 26) {
+                                                                                             console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                                                                             console.log("The autonomous engine is authorized to push the diary entry.");
+                                                                                             process.exit(0);
+                                                                                         } else {
+                                                                                             console.log(`❌ Truth Gate Failed: Expected 26 ledger events, got ${finalHistory.length}`);
+                                                                                             process.exit(1);
+                                                                                         }
                                                                                      } else {
-                                                                                         console.log(`❌ Truth Gate Failed: Expected 25 ledger events, got ${finalHistory.length}`);
+                                                                                         console.log(`❌ Truth Gate Failed: Forecaster failed to recognize $1M+ valuation. Got status: ${forecastResult.forecastStatus}`);
                                                                                          process.exit(1);
                                                                                      }
                                                                                  } else {
