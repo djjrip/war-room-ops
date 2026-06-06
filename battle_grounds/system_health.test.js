@@ -117,8 +117,9 @@ function runTruthGate() {
   const clientPath = path.join(coreDir, 'nexus-client-success-predictor.js');
   const complianceVaultPath = path.join(coreDir, 'nexus-compliance-vault.js');
   const pricingPath = path.join(coreDir, 'nexus-pricing-optimizer.js');
+  const marketPath = path.join(coreDir, 'nexus-market-expansion.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath) && fs.existsSync(scalePath) && fs.existsSync(reportPath) && fs.existsSync(talentPath) && fs.existsSync(intelPath) && fs.existsSync(clientPath) && fs.existsSync(complianceVaultPath) && fs.existsSync(pricingPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath) && fs.existsSync(scalePath) && fs.existsSync(reportPath) && fs.existsSync(talentPath) && fs.existsSync(intelPath) && fs.existsSync(clientPath) && fs.existsSync(complianceVaultPath) && fs.existsSync(pricingPath) && fs.existsSync(marketPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -147,8 +148,9 @@ function runTruthGate() {
       const clientPredictor = require(clientPath);
       const complianceVault = require(complianceVaultPath);
       const pricingOptimizer = require(pricingPath);
+      const marketExpansion = require(marketPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth() && scaleController.checkHealth() && shareholderReport.checkHealth() && talentAcquirer.checkHealth() && competitorIntel.checkHealth() && clientPredictor.checkHealth() && complianceVault.checkHealth() && pricingOptimizer.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth() && scaleController.checkHealth() && shareholderReport.checkHealth() && talentAcquirer.checkHealth() && competitorIntel.checkHealth() && clientPredictor.checkHealth() && complianceVault.checkHealth() && pricingOptimizer.checkHealth() && marketExpansion.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -289,13 +291,22 @@ function runTruthGate() {
                                                                                                                                  const pricingResult = pricingOptimizer.analyzeUsageTelemetry("ENT-774", "PRO", 120000, 95); // Simulate Pro Client at 95% capacity
                                                                                                                                  if (pricingResult.status === "UPSELL_TRIGGERED") {
                                                                                                                                      console.log(`✅ Simulation 19 Passed: Pricing Optimizer autonomously upgraded contract to $${pricingResult.newACV}. Valuation Impact: +$${pricingResult.valuationImpact}`);
-                                                                                                                                     const finalHistory = ledger.getHistory();
-                                                                                                                                     if (finalHistory.length === 37) {
-                                                                                                                                         console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                                                                                                                                         console.log("The autonomous engine is authorized to push the diary entry.");
-                                                                                                                                         process.exit(0);
+                                                                                                                                     // Simulation 20: Market Expansion
+                                                                                                                                     console.log("\n--- SIMULATION 20: MARKET EXPANSION ---");
+                                                                                                                                     const expansionResult = marketExpansion.analyzeGlobalTelemetry("AP-NORTHEAST-1", 55000); // Simulate high Tokyo traffic
+                                                                                                                                     if (expansionResult.status === "EXPANDED") {
+                                                                                                                                         console.log(`✅ Simulation 20 Passed: Market Expansion autonomously localized the platform. TAM Impact: +$${expansionResult.tamImpact}`);
+                                                                                                                                         const finalHistory = ledger.getHistory();
+                                                                                                                                         if (finalHistory.length === 38) {
+                                                                                                                                             console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                                                                                                                             console.log("The autonomous engine is authorized to push the diary entry.");
+                                                                                                                                             process.exit(0);
+                                                                                                                                         } else {
+                                                                                                                                             console.log(`❌ Truth Gate Failed: Expected 38 ledger events, got ${finalHistory.length}`);
+                                                                                                                                             process.exit(1);
+                                                                                                                                         }
                                                                                                                                      } else {
-                                                                                                                                         console.log(`❌ Truth Gate Failed: Expected 37 ledger events, got ${finalHistory.length}`);
+                                                                                                                                         console.log(`❌ Truth Gate Failed: Market Expansion failed to localize.`);
                                                                                                                                          process.exit(1);
                                                                                                                                      }
                                                                                                                                  } else {
