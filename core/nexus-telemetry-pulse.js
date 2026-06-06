@@ -43,12 +43,16 @@ class NexusTelemetryPulse {
             }
         });
 
+        const valuationEngine = require('./nexus-valuation-engine');
+        const valuationResult = valuationEngine.calculateValuation(totalRevenueBilled, 1);
+
         const pulsePayload = {
             timestamp: new Date().toISOString(),
             systemState: threatMitigator.isSystemLocked() ? "DEFCON 1 (LOCKED)" : "OPERATIONAL",
             metrics: {
                 capitalSaved: `$${totalCapitalSaved}`,
                 revenueBilled: `$${totalRevenueBilled}`,
+                enterpriseValuation: `$${valuationResult.enterpriseValue.toLocaleString()}`,
                 successfulDeployments: totalDeployments,
                 emergencyRollbacks: totalRollbacks,
                 securityInterventions: totalSecurityBlocks,

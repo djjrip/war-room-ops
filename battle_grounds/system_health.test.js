@@ -103,8 +103,10 @@ function runTruthGate() {
   const escalationPath = path.join(coreDir, 'nexus-escalation-matrix.js');
   const liquidityPath = path.join(coreDir, 'nexus-liquidity-manager.js');
   const revenuePath = path.join(coreDir, 'nexus-revenue-engine.js');
+  const valuationPath = path.join(coreDir, 'nexus-valuation-engine.js');
+  const strategyPath = path.join(coreDir, 'nexus-strategy-director.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -119,8 +121,10 @@ function runTruthGate() {
       const escalationMatrix = require(escalationPath);
       const liquidityManager = require(liquidityPath);
       const revenueEngine = require(revenuePath);
+      const valuationEngine = require(valuationPath);
+      const strategyDirector = require(strategyPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -175,15 +179,20 @@ function runTruthGate() {
                                                                     // Verify Ledger & Telemetry Pulse
                                                                     console.log("\n--- AUDITING IMMUTABLE LEDGER ---");
                                                                     const history = ledger.getHistory();
-                                                                    // Expected operations = 22
+                                                                    // Expected operations = 22 (prior to telemetry)
                                                                     if (history.length === 22) { 
                                                                         console.log(`✅ Ledger verification passed. Trapped ${history.length} operations cryptographically.`);
                                                                         
                                                                         console.log("\n--- GENERATING TELEMETRY PULSE ---");
                                                                         const payload = telemetryPulse.broadcastPulse();
                                                                         
-                                                                        if (payload.metrics.capitalSaved === "$3600" && payload.metrics.revenueBilled === "$720" && payload.metrics.totalLedgerEvents === 22) {
-                                                                            console.log("✅ Simulation 5 Passed: Telemetry Pulse successfully aggregated agency metrics.");
+                                                                        if (payload.metrics.capitalSaved === "$3600" && payload.metrics.revenueBilled === "$720" && payload.metrics.enterpriseValuation === "$2,628,000" && payload.metrics.totalLedgerEvents === 23) {
+                                                                            console.log("✅ Simulation 5 Passed: Telemetry Pulse successfully aggregated agency metrics and Valuation Engine calculated $2.6M+ Enterprise Value.");
+                                                                            
+                                                                            // EXPORT TELEMETRY TO PUBLIC REPOSITORY
+                                                                            const telemetryExportPath = path.join('C:\\Users\\Jayson Quindao\\.gemini\\antigravity\\playground\\djjrip', 'telemetry.json');
+                                                                            fs.writeFileSync(telemetryExportPath, JSON.stringify(payload, null, 2));
+                                                                            console.log("✅ Telemetry payload exported to djjrip/telemetry.json for public consumption.");
                                                                             
                                                                             // Simulation 6: Escalation Matrix
                                                                             console.log("\n--- SIMULATION 6: ESCALATION MATRIX ---");
@@ -191,13 +200,22 @@ function runTruthGate() {
                                                                             if (escalationResult.escalated === true) {
                                                                                  console.log("✅ Simulation 6 Passed: Escalation Matrix properly identified critical anomalies and paged the Director.");
                                                                                  
-                                                                                 const finalHistory = ledger.getHistory();
-                                                                                 if (finalHistory.length === 23) {
-                                                                                     console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                                                                                     console.log("The autonomous engine is authorized to push the diary entry.");
-                                                                                     process.exit(0);
+                                                                                 // Simulation 7: Strategy Director
+                                                                                 console.log("\n--- SIMULATION 7: STRATEGY DIRECTOR ---");
+                                                                                 const strategyResult = strategyDirector.formulateStrategy(payload);
+                                                                                 if (strategyResult.executedStrategy === "HARDENED_ZERO_TRUST") {
+                                                                                     console.log("✅ Simulation 7 Passed: Strategy Director shifted architecture to Zero-Trust due to elevated threat levels.");
+                                                                                     const finalHistory = ledger.getHistory();
+                                                                                     if (finalHistory.length === 25) {
+                                                                                         console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                                                                         console.log("The autonomous engine is authorized to push the diary entry.");
+                                                                                         process.exit(0);
+                                                                                     } else {
+                                                                                         console.log(`❌ Truth Gate Failed: Expected 25 ledger events, got ${finalHistory.length}`);
+                                                                                         process.exit(1);
+                                                                                     }
                                                                                  } else {
-                                                                                     console.error(`❌ Truth Gate Failed: Escalation matrix failed to record page on ledger. Expected 20, got ${finalHistory.length}`);
+                                                                                     console.log(`❌ Truth Gate Failed: Strategy Director failed to shift to Zero Trust. Got: ${strategyResult.executedStrategy}`);
                                                                                      process.exit(1);
                                                                                  }
                                                                             } else {
