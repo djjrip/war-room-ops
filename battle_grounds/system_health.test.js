@@ -112,8 +112,9 @@ function runTruthGate() {
   const vaultPath = path.join(coreDir, 'nexus-ip-vault.js');
   const scalePath = path.join(coreDir, 'nexus-scale-controller.js');
   const reportPath = path.join(coreDir, 'nexus-shareholder-report.js');
+  const talentPath = path.join(coreDir, 'nexus-talent-acquirer.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath) && fs.existsSync(scalePath) && fs.existsSync(reportPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath) && fs.existsSync(scalePath) && fs.existsSync(reportPath) && fs.existsSync(talentPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -137,8 +138,9 @@ function runTruthGate() {
       const ipVault = require(vaultPath);
       const scaleController = require(scalePath);
       const shareholderReport = require(reportPath);
+      const talentAcquirer = require(talentPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth() && scaleController.checkHealth() && shareholderReport.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth() && scaleController.checkHealth() && shareholderReport.checkHealth() && talentAcquirer.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -254,13 +256,22 @@ function runTruthGate() {
                                                                                                              const reportResult = shareholderReport.generateShareholderDigest(payload);
                                                                                                              if (reportResult.status === "DIGEST_PUBLISHED") {
                                                                                                                  console.log(`✅ Simulation 14 Passed: Shareholder Report generated with cryptographic signature: ${reportResult.signature.substring(0, 16)}...`);
-                                                                                                                 const finalHistory = ledger.getHistory();
-                                                                                                                 if (finalHistory.length === 32) {
-                                                                                                                     console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                                                                                                                     console.log("The autonomous engine is authorized to push the diary entry.");
-                                                                                                                     process.exit(0);
+                                                                                                                 // Simulation 15: Talent Acquirer
+                                                                                                                 console.log("\n--- SIMULATION 15: TALENT ACQUIRER ---");
+                                                                                                                 const talentResult = talentAcquirer.evaluateWorkforceNeeds(payload, 88); // Simulate 88% complexity
+                                                                                                                 if (talentResult.status === "FTE_PROVISIONED") {
+                                                                                                                     console.log(`✅ Simulation 15 Passed: Talent Acquirer detected bottleneck and autonomously provisioned AI FTE: ${talentResult.agent.id}`);
+                                                                                                                     const finalHistory = ledger.getHistory();
+                                                                                                                     if (finalHistory.length === 33) {
+                                                                                                                         console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                                                                                                         console.log("The autonomous engine is authorized to push the diary entry.");
+                                                                                                                         process.exit(0);
+                                                                                                                     } else {
+                                                                                                                         console.log(`❌ Truth Gate Failed: Expected 33 ledger events, got ${finalHistory.length}`);
+                                                                                                                         process.exit(1);
+                                                                                                                     }
                                                                                                                  } else {
-                                                                                                                     console.log(`❌ Truth Gate Failed: Expected 32 ledger events, got ${finalHistory.length}`);
+                                                                                                                     console.log(`❌ Truth Gate Failed: Talent Acquirer failed to provision AI workforce.`);
                                                                                                                      process.exit(1);
                                                                                                                  }
                                                                                                              } else {
