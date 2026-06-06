@@ -113,8 +113,9 @@ function runTruthGate() {
   const scalePath = path.join(coreDir, 'nexus-scale-controller.js');
   const reportPath = path.join(coreDir, 'nexus-shareholder-report.js');
   const talentPath = path.join(coreDir, 'nexus-talent-acquirer.js');
+  const intelPath = path.join(coreDir, 'nexus-competitor-intelligence.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath) && fs.existsSync(scalePath) && fs.existsSync(reportPath) && fs.existsSync(talentPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath) && fs.existsSync(scalePath) && fs.existsSync(reportPath) && fs.existsSync(talentPath) && fs.existsSync(intelPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -139,8 +140,9 @@ function runTruthGate() {
       const scaleController = require(scalePath);
       const shareholderReport = require(reportPath);
       const talentAcquirer = require(talentPath);
+      const competitorIntel = require(intelPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth() && scaleController.checkHealth() && shareholderReport.checkHealth() && talentAcquirer.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth() && scaleController.checkHealth() && shareholderReport.checkHealth() && talentAcquirer.checkHealth() && competitorIntel.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -261,13 +263,22 @@ function runTruthGate() {
                                                                                                                  const talentResult = talentAcquirer.evaluateWorkforceNeeds(payload, 88); // Simulate 88% complexity
                                                                                                                  if (talentResult.status === "FTE_PROVISIONED") {
                                                                                                                      console.log(`✅ Simulation 15 Passed: Talent Acquirer detected bottleneck and autonomously provisioned AI FTE: ${talentResult.agent.id}`);
-                                                                                                                     const finalHistory = ledger.getHistory();
-                                                                                                                     if (finalHistory.length === 33) {
-                                                                                                                         console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                                                                                                                         console.log("The autonomous engine is authorized to push the diary entry.");
-                                                                                                                         process.exit(0);
+                                                                                                                     // Simulation 16: Competitor Intelligence
+                                                                                                                     console.log("\n--- SIMULATION 16: COMPETITOR INTELLIGENCE ---");
+                                                                                                                     const intelResult = competitorIntel.scanMarketLandscape("PRICE_DUMP"); // Simulate Tier-1 price dump
+                                                                                                                     if (intelResult.status === "THREAT_MITIGATED") {
+                                                                                                                         console.log(`✅ Simulation 16 Passed: Competitor Intelligence detected a price dump and initiated countermeasures.`);
+                                                                                                                         const finalHistory = ledger.getHistory();
+                                                                                                                         if (finalHistory.length === 34) {
+                                                                                                                             console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                                                                                                             console.log("The autonomous engine is authorized to push the diary entry.");
+                                                                                                                             process.exit(0);
+                                                                                                                         } else {
+                                                                                                                             console.log(`❌ Truth Gate Failed: Expected 34 ledger events, got ${finalHistory.length}`);
+                                                                                                                             process.exit(1);
+                                                                                                                         }
                                                                                                                      } else {
-                                                                                                                         console.log(`❌ Truth Gate Failed: Expected 33 ledger events, got ${finalHistory.length}`);
+                                                                                                                         console.log(`❌ Truth Gate Failed: Competitor Intelligence failed to mitigate threat.`);
                                                                                                                          process.exit(1);
                                                                                                                      }
                                                                                                                  } else {
