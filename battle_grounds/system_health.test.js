@@ -114,8 +114,9 @@ function runTruthGate() {
   const reportPath = path.join(coreDir, 'nexus-shareholder-report.js');
   const talentPath = path.join(coreDir, 'nexus-talent-acquirer.js');
   const intelPath = path.join(coreDir, 'nexus-competitor-intelligence.js');
+  const clientPath = path.join(coreDir, 'nexus-client-success-predictor.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath) && fs.existsSync(scalePath) && fs.existsSync(reportPath) && fs.existsSync(talentPath) && fs.existsSync(intelPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath) && fs.existsSync(scalePath) && fs.existsSync(reportPath) && fs.existsSync(talentPath) && fs.existsSync(intelPath) && fs.existsSync(clientPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -141,8 +142,9 @@ function runTruthGate() {
       const shareholderReport = require(reportPath);
       const talentAcquirer = require(talentPath);
       const competitorIntel = require(intelPath);
+      const clientPredictor = require(clientPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth() && scaleController.checkHealth() && shareholderReport.checkHealth() && talentAcquirer.checkHealth() && competitorIntel.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth() && scaleController.checkHealth() && shareholderReport.checkHealth() && talentAcquirer.checkHealth() && competitorIntel.checkHealth() && clientPredictor.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -268,13 +270,22 @@ function runTruthGate() {
                                                                                                                      const intelResult = competitorIntel.scanMarketLandscape("PRICE_DUMP"); // Simulate Tier-1 price dump
                                                                                                                      if (intelResult.status === "THREAT_MITIGATED") {
                                                                                                                          console.log(`✅ Simulation 16 Passed: Competitor Intelligence detected a price dump and initiated countermeasures.`);
-                                                                                                                         const finalHistory = ledger.getHistory();
-                                                                                                                         if (finalHistory.length === 34) {
-                                                                                                                             console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
-                                                                                                                             console.log("The autonomous engine is authorized to push the diary entry.");
-                                                                                                                             process.exit(0);
+                                                                                                                         // Simulation 17: Client Success Predictor
+                                                                                                                         console.log("\n--- SIMULATION 17: CLIENT SUCCESS PREDICTOR ---");
+                                                                                                                         const clientResult = clientPredictor.analyzeClientHealth("ENT-991", 62, 50000); // Simulate Enterprise Client dropping to 62% engagement
+                                                                                                                         if (clientResult.status === "MITIGATION_ACTIVE") {
+                                                                                                                             console.log(`✅ Simulation 17 Passed: Client Success Predictor detected churn risk and protected $${clientResult.valuationProtected} in enterprise valuation.`);
+                                                                                                                             const finalHistory = ledger.getHistory();
+                                                                                                                             if (finalHistory.length === 35) {
+                                                                                                                                 console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
+                                                                                                                                 console.log("The autonomous engine is authorized to push the diary entry.");
+                                                                                                                                 process.exit(0);
+                                                                                                                             } else {
+                                                                                                                                 console.log(`❌ Truth Gate Failed: Expected 35 ledger events, got ${finalHistory.length}`);
+                                                                                                                                 process.exit(1);
+                                                                                                                             }
                                                                                                                          } else {
-                                                                                                                             console.log(`❌ Truth Gate Failed: Expected 34 ledger events, got ${finalHistory.length}`);
+                                                                                                                             console.log(`❌ Truth Gate Failed: Client Success Predictor failed to mitigate churn.`);
                                                                                                                              process.exit(1);
                                                                                                                          }
                                                                                                                      } else {
