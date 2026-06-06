@@ -198,3 +198,8 @@ We do not hype theoretical "vibe coding." If an integration or feature is claime
 - **Status:** PASS
 - **Module:** `nexus-corporate-governance.js`
 - **Outcome:** Generated cryptographically signed board resolution for $5.5M autonomous acquisition framework. Truth gate passed at 44 events.
+
+## Iteration 33 (Module 27: Treasury Manager)
+- **Status:** PASS
+- **Module:** `nexus-treasury-manager.js`
+- **Outcome:** Generated autonomous sweep of  excess capital. Projected yield ,166/month. Truth gate passed at 45 events.
