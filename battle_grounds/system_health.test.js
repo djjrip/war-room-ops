@@ -119,8 +119,9 @@ function runTruthGate() {
   const pricingPath = path.join(coreDir, 'nexus-pricing-optimizer.js');
   const marketPath = path.join(coreDir, 'nexus-market-expansion.js');
   const irPath = path.join(coreDir, 'nexus-investor-relations.js');
+  const redTeamPath = path.join(coreDir, 'nexus-security-red-team.js');
   
-  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath) && fs.existsSync(scalePath) && fs.existsSync(reportPath) && fs.existsSync(talentPath) && fs.existsSync(intelPath) && fs.existsSync(clientPath) && fs.existsSync(complianceVaultPath) && fs.existsSync(pricingPath) && fs.existsSync(marketPath) && fs.existsSync(irPath)) {
+  if (fs.existsSync(orchestratorPath) && fs.existsSync(overridePath) && fs.existsSync(ledgerPath) && fs.existsSync(riskEnginePath) && fs.existsSync(revertEnginePath) && fs.existsSync(mitigatorPath) && fs.existsSync(indexerPath) && fs.existsSync(optimizerPath) && fs.existsSync(pulsePath) && fs.existsSync(healingPath) && fs.existsSync(compliancePath) && fs.existsSync(escalationPath) && fs.existsSync(liquidityPath) && fs.existsSync(revenuePath) && fs.existsSync(valuationPath) && fs.existsSync(strategyPath) && fs.existsSync(forecastPath) && fs.existsSync(boardPath) && fs.existsSync(dividendPath) && fs.existsSync(exitPath) && fs.existsSync(vaultPath) && fs.existsSync(scalePath) && fs.existsSync(reportPath) && fs.existsSync(talentPath) && fs.existsSync(intelPath) && fs.existsSync(clientPath) && fs.existsSync(complianceVaultPath) && fs.existsSync(pricingPath) && fs.existsSync(marketPath) && fs.existsSync(irPath) && fs.existsSync(redTeamPath)) {
       const orchestrator = require(orchestratorPath);
       const humanOverride = require(overridePath);
       const ledger = require(ledgerPath);
@@ -151,8 +152,9 @@ function runTruthGate() {
       const pricingOptimizer = require(pricingPath);
       const marketExpansion = require(marketPath);
       const irCRM = require(irPath);
+      const redTeam = require(redTeamPath);
       
-      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth() && scaleController.checkHealth() && shareholderReport.checkHealth() && talentAcquirer.checkHealth() && competitorIntel.checkHealth() && clientPredictor.checkHealth() && complianceVault.checkHealth() && pricingOptimizer.checkHealth() && marketExpansion.checkHealth() && irCRM.checkHealth()) {
+      if (orchestrator.checkHealth() && humanOverride.checkHealth() && ledger.checkHealth() && riskEngine.checkHealth() && revertEngine.checkHealth() && threatMitigator.checkHealth() && ledgerIndexer.checkHealth() && capitalOptimizer.checkHealth() && telemetryPulse.checkHealth() && healingEngine.checkHealth() && complianceAuditor.checkHealth() && escalationMatrix.checkHealth() && liquidityManager.checkHealth() && revenueEngine.checkHealth() && valuationEngine.checkHealth() && strategyDirector.checkHealth() && profitabilityForecaster.checkHealth() && boardOfDirectors.checkHealth() && dividendEmitter.checkHealth() && exitStrategist.checkHealth() && ipVault.checkHealth() && scaleController.checkHealth() && shareholderReport.checkHealth() && talentAcquirer.checkHealth() && competitorIntel.checkHealth() && clientPredictor.checkHealth() && complianceVault.checkHealth() && pricingOptimizer.checkHealth() && marketExpansion.checkHealth() && irCRM.checkHealth() && redTeam.checkHealth()) {
           console.log("✅ All Core Nexus Subsystems are ONLINE.");
           
           // Simulation -1: Perimeter Breach & Lockdown
@@ -303,16 +305,25 @@ function runTruthGate() {
                                                                                                                                          const irResult = irCRM.generateStrategicUpdates(2628000); 
                                                                                                                                          if (irResult.status === "UPDATES_DISPATCHED") {
                                                                                                                                              console.log(`✅ Simulation 21 Passed: Investor Relations autonomously dispatched updates to ${irResult.targets} tier-1 M&A/VC targets.`);
+                                                                                                                                         // Simulation 22: Security Red Team
+                                                                                                                                         console.log("\n--- SIMULATION 22: SECURITY RED TEAM ---");
+                                                                                                                                         const redTeamResult = redTeam.executeContinuousAssault("VULNERABLE"); 
+                                                                                                                                         if (redTeamResult.status === "PATCHED") {
+                                                                                                                                             console.log(`✅ Simulation 22 Passed: Security Red Team autonomously exploited and patched a ${redTeamResult.vector} vulnerability.`);
                                                                                                                                              const finalHistory = ledger.getHistory();
-                                                                                                                                             if (finalHistory.length === 39) {
+                                                                                                                                             if (finalHistory.length === 40) {
                                                                                                                                                  console.log("\n[STATUS: PASS] Truth Gate Unlocked.");
                                                                                                                                                  console.log("The autonomous engine is authorized to push the diary entry.");
                                                                                                                                                  process.exit(0);
                                                                                                                                              } else {
-                                                                                                                                                 console.log(`❌ Truth Gate Failed: Expected 39 ledger events, got ${finalHistory.length}`);
+                                                                                                                                                 console.log(`❌ Truth Gate Failed: Expected 40 ledger events, got ${finalHistory.length}`);
                                                                                                                                                  process.exit(1);
                                                                                                                                              }
                                                                                                                                          } else {
+                                                                                                                                             console.log(`❌ Truth Gate Failed: Security Red Team failed to exploit/patch the vulnerability.`);
+                                                                                                                                             process.exit(1);
+                                                                                                                                         }
+                                                                                                                                     } else {
                                                                                                                                              console.log(`❌ Truth Gate Failed: Investor Relations failed to dispatch updates.`);
                                                                                                                                              process.exit(1);
                                                                                                                                          }
