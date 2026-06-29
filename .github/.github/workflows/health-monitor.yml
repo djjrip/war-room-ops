@@ -1,0 +1,35 @@
+name: 📊 GG Loop Health Monitor
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check ggloop.io is up
+        id: site_check
+        run: |
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://ggloop.io)
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          if [ "$STATUS" != "200" ]; then
+            echo "SITE DOWN - Status: $STATUS"
+            exit 1
+          fi
+          echo "Site is UP - Status: $STATUS"
+
+      - name: Alert Discord if site is down
+        if: failure() && env.DISCORD_WEBHOOK != ''
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{"content":"🚨 **ALERT: ggloop.io is DOWN!**\nHTTP Status: ${{ steps.site_check.outputs.status }}\nCheck immediately: https://ggloop.io"}' \
+            "$DISCORD_WEBHOOK"
+
+      - name: Check anti-cheat SDK page
+        run: |
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://djjrip.github.io/anti-cheat-sdk)
+          echo "Anti-Cheat SDK Page Status: $STATUS"
