@@ -1,0 +1,61 @@
+name: 🤖 Nexus Opportunity Engine (Daily)
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # Every day at 9AM UTC
+  workflow_dispatch:       # Manual trigger anytime
+
+jobs:
+  run-opportunity-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm install csv-parse
+
+      - name: Generate sample data (replace with real scraper output)
+        run: |
+          echo '[
+            {"title":"B2B Sponsor Deal - Gaming App","source":"upwork","url":"https://upwork.com/example","description":"Looking for gaming reward platform integration partner with B2B sponsorship capabilities","estimatedValue":5000,"tags":["b2b","sponsor","gaming","saas"],"scrapedAt":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"},
+            {"title":"Anti-Cheat SDK Integration","source":"hackernews","url":"https://hn.example","description":"Indie studio needs anti-cheat solution for competitive game, recurring contract","estimatedValue":1200,"tags":["anti-cheat","sdk","gaming","contract"],"scrapedAt":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"},
+            {"title":"Gaming Rewards Affiliate Program","source":"reddit","url":"https://reddit.com/example","description":"High margin affiliate revenue share deal for gaming platform referrals","estimatedValue":800,"tags":["affiliate","revenue share","gaming","commission"],"scrapedAt":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"} 
+          ]' > nexus-results.json
+
+      - name: Run Opportunity Analyzer
+        run: node nexus-opportunity-analyzer.js
+        working-directory: .
+
+      - name: Post top opportunity to Discord
+        if: env.DISCORD_WEBHOOK != ''
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          TOP=$(node -e "
+            const r=require('./nexus-results.json');
+            const top=r[0];
+            console.log(JSON.stringify({
+              content: '🤖 **Nexus Daily Brief**\n\n**#1 Opportunity:** '+top.title+'\n**Category:** '+top.category+'\n**Estimated Value:** \$'+top.estimatedValue+'\n**GG Score:** '+(top.ggScore*100).toFixed(1)+'\n**URL:** '+top.url
+            }));
+          ")
+          curl -H "Content-Type: application/json" -d "$TOP" "$DISCORD_WEBHOOK"
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-results-${{ github.run_id }}
+          path: nexus-results.json
+          retention-days: 30
+
+      - name: Commit updated results to repo
+        run: |
+          git config user.name "Nexus Bot"
+          git config user.email "nexus@ggloop.io"
+          git add nexus-results.json || true
+          git diff --staged --quiet || git commit -m "chore: daily opportunity scan [skip ci]"
+          git push || true
