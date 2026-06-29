@@ -1,0 +1,126 @@
+name: 📡 GG Loop Live Status — All Channels
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # Every 30 minutes
+  workflow_dispatch:         # Manual trigger anytime
+
+jobs:
+  broadcast-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install discord.js
+        run: npm install discord.js node-fetch
+
+      - name: Check ggloop.io metrics
+        id: metrics
+        run: |
+          START=$(date +%s%N)
+          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}" --max-time 10 https://ggloop.io)
+          END=$(date +%s%N)
+          LATENCY=$(( ($END - $START) / 1000000 ))
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "status_emoji=🟢" >> $GITHUB_OUTPUT
+            echo "status_text=ONLINE" >> $GITHUB_OUTPUT
+            echo "color=3126984" >> $GITHUB_OUTPUT
+          elif [ "$HTTP_CODE" = "000" ]; then
+            echo "status_emoji=🔴" >> $GITHUB_OUTPUT
+            echo "status_text=UNREACHABLE" >> $GITHUB_OUTPUT
+            echo "color=15158332" >> $GITHUB_OUTPUT
+          else
+            echo "status_emoji=🟡" >> $GITHUB_OUTPUT
+            echo "status_text=DEGRADED ($HTTP_CODE)" >> $GITHUB_OUTPUT
+            echo "color=16776960" >> $GITHUB_OUTPUT
+          fi
+
+          echo "latency=$LATENCY" >> $GITHUB_OUTPUT
+          echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date -u '+%B %d, %Y at %H:%M UTC')" >> $GITHUB_OUTPUT
+
+      - name: Broadcast to all Discord channels
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_GUILD_ID: ${{ secrets.DISCORD_GUILD_ID }}
+          STATUS_EMOJI: ${{ steps.metrics.outputs.status_emoji }}
+          STATUS_TEXT: ${{ steps.metrics.outputs.status_text }}
+          LATENCY: ${{ steps.metrics.outputs.latency }}
+          HTTP_CODE: ${{ steps.metrics.outputs.http_code }}
+          COLOR: ${{ steps.metrics.outputs.color }}
+          TIMESTAMP: ${{ steps.metrics.outputs.timestamp }}
+        run: |
+          node << 'EOF'
+          const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+
+          const client = new Client({
+            intents: [
+              GatewayIntentBits.Guilds,
+              GatewayIntentBits.GuildMessages,
+            ],
+          });
+
+          client.once('ready', async () => {
+            console.log(`Bot online: ${client.user.tag}`);
+
+            const embed = new EmbedBuilder()
+              .setTitle(`${process.env.STATUS_EMOJI} GG Loop — Live Status Update`)
+              .setColor(parseInt(process.env.COLOR))
+              .setDescription(`**ggloop.io** is currently **${process.env.STATUS_TEXT}**`)
+              .addFields(
+                { name: '🌐 Site Status', value: `\`${process.env.STATUS_TEXT}\``, inline: true },
+                { name: '⚡ Latency', value: `\`${process.env.LATENCY}ms\``, inline: true },
+                { name: '📡 HTTP', value: `\`${process.env.HTTP_CODE}\``, inline: true },
+                { name: '🛡️ Anti-Cheat SDK', value: '[Live Page ↗](https://djjrip.github.io/anti-cheat-sdk)', inline: true },
+                { name: '🎮 GG Loop', value: '[ggloop.io ↗](https://ggloop.io)', inline: true },
+                { name: '⏰ Updated', value: `\`${process.env.TIMESTAMP}\``, inline: false },
+              )
+              .setFooter({ text: 'Nexus CTO Controller • Auto-updates every 30 min' })
+              .setTimestamp();
+
+            try {
+              const guild = await client.guilds.fetch(process.env.DISCORD_GUILD_ID);
+              const channels = await guild.channels.fetch();
+
+              let posted = 0;
+              for (const [, channel] of channels) {
+                if (
+                  channel &&
+                  channel.isTextBased() &&
+                  !channel.isThread() &&
+                  !channel.isVoiceBased() &&
+                  channel.permissionsFor(guild.members.me)?.has('SendMessages')
+                ) {
+                  try {
+                    await channel.send({ embeds: [embed] });
+                    console.log(`✅ Posted to #${channel.name}`);
+                    posted++;
+                    await new Promise(r => setTimeout(r, 800));
+                  } catch (e) {
+                    console.log(`⏭️  Skipped #${channel.name}: ${e.message}`);
+                  }
+                }
+              }
+              console.log(`\n📡 Broadcast complete — ${posted} channels updated`);
+            } catch (err) {
+              console.error('Error:', err.message);
+            }
+
+            process.exit(0);
+          });
+
+          client.login(process.env.DISCORD_BOT_TOKEN);
+          EOF
+
+      - name: Alert if site is DOWN
+        if: steps.metrics.outputs.http_code != '200'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{\"content\":\"🚨 **@everyone CRITICAL: ggloop.io is DOWN!**\nHTTP: \`${{ steps.metrics.outputs.http_code }}\`\nLatency: \`${{ steps.metrics.outputs.latency }}ms\`\nCheck now → https://ggloop.io\"}" \
+            "$DISCORD_WEBHOOK"
