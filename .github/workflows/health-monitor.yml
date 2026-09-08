@@ -1,8 +1,7 @@
 name: 📊 GG Loop Health Monitor
 
 on:
-  schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
+  # schedule: (DISABLED - manual workflow_dispatch only)
   workflow_dispatch:
 
 jobs:

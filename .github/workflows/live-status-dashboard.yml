@@ -1,8 +1,7 @@
 name: 📡 GG Loop Live Status — All Channels
 
 on:
-  schedule:
-    - cron: '*/30 * * * *'  # Every 30 minutes
+  # schedule: (DISABLED - manual workflow_dispatch only)
   workflow_dispatch:         # Manual trigger anytime
 
 jobs:

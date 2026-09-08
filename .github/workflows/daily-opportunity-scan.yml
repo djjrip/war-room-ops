@@ -1,8 +1,7 @@
 name: 🤖 Nexus Opportunity Engine (Daily)
 
 on:
-  schedule:
-    - cron: '0 9 * * *'  # Every day at 9AM UTC
+  # schedule: (DISABLED - manual workflow_dispatch only)
   workflow_dispatch:       # Manual trigger anytime
 
 jobs:
